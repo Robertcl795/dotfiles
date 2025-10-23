@@ -1,0 +1,40 @@
+# Dotfiles Repository .gitignore
+
+# Backup directory
+backup/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+
+# Local customizations (users should edit their own)
+config/.zshrc.local
+config/.gitconfig.local
+
+# SSH keys (NEVER commit these!)
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+id_ecdsa*
+
+# Environment files
+.env
+.env.local
+
+# Test directories
+test/
+tmp/

@@ -1,0 +1,21 @@
+# .envrc for ~/personal directory
+# This file is automatically loaded by direnv when entering ~/personal
+
+# Export SSH context
+export SSH_AUTH_SOCK_CONTEXT="personal"
+
+# Load personal SSH key
+if [[ -f ~/.ssh/keys/personal/id_ed25519 ]]; then
+    ssh-add -D 2>/dev/null || true
+    ssh-add ~/.ssh/keys/personal/id_ed25519 2>/dev/null
+fi
+
+# Export Git SSH command for personal context
+export GIT_SSH_COMMAND="ssh -i ~/.ssh/keys/personal/id_ed25519 -F ~/.ssh/config.personal"
+
+# Optional: Set personal-specific environment variables
+# export AWS_PROFILE="personal"
+# export KUBECONFIG="$HOME/.kube/config-personal"
+
+# Show context indicator
+echo "🏠 Switched to PERSONAL context"

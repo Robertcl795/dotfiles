@@ -1,0 +1,40 @@
+# ~/.ssh/config.work - Work SSH Configuration
+
+# GitHub Work Account
+Host github.com-work
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/keys/work/id_ed25519
+    IdentitiesOnly yes
+    AddKeysToAgent yes
+
+# GitLab Work Account (if applicable)
+Host gitlab.com-work
+    HostName gitlab.com
+    User git
+    IdentityFile ~/.ssh/keys/work/id_ed25519
+    IdentitiesOnly yes
+    AddKeysToAgent yes
+
+# Bitbucket Work Account (if applicable)
+Host bitbucket.org-work
+    HostName bitbucket.org
+    User git
+    IdentityFile ~/.ssh/keys/work/id_ed25519
+    IdentitiesOnly yes
+    AddKeysToAgent yes
+
+# Add your company's internal Git servers here
+# Example:
+# Host git.company.com
+#     HostName git.company.com
+#     User git
+#     IdentityFile ~/.ssh/keys/work/id_ed25519
+#     IdentitiesOnly yes
+#     AddKeysToAgent yes
+
+# Default settings for all work hosts
+Host *
+    ServerAliveInterval 60
+    ServerAliveCountMax 30
+    TCPKeepAlive yes

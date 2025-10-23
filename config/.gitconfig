@@ -1,0 +1,97 @@
+# ~/.gitconfig - Main Git Configuration
+# This file includes context-specific configurations
+
+[user]
+	name = Your Name
+	email = your.email@example.com
+
+[core]
+	editor = vim
+	autocrlf = input
+	excludesfile = ~/.gitignore_global
+	pager = less -FRX
+
+[init]
+	defaultBranch = main
+
+[pull]
+	rebase = false
+
+[push]
+	default = simple
+	autoSetupRemote = true
+
+[fetch]
+	prune = true
+
+[diff]
+	colorMoved = zebra
+
+[merge]
+	conflictstyle = diff3
+
+[rebase]
+	autoStash = true
+
+[alias]
+	# Shortcuts
+	st = status
+	co = checkout
+	br = branch
+	ci = commit
+	unstage = reset HEAD --
+	last = log -1 HEAD
+	
+	# Pretty logs
+	lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+	lga = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --all
+	
+	# Show modified files in last commit
+	dl = "!git ll -1"
+	
+	# Show a diff last commit
+	dlc = diff --cached HEAD^
+	
+	# Show content (full diff) of a commit given a revision
+	dr  = "!f() { git diff "$1"^.."$1"; }; f"
+	lc  = "!f() { git ll "$1"^.."$1"; }; f"
+	diffr  = "!f() { git diff "$1"^.."$1"; }; f"
+	
+	# Find a file path in codebase
+	f = "!git ls-files | grep -i"
+	
+	# Search/grep on codebase
+	grep = grep -Ii
+	gr = grep -Ii
+	
+	# Rename branch
+	rename-branch = branch -m
+	
+	# List contributors
+	contributors = shortlog --summary --numbered
+
+[color]
+	ui = auto
+
+[color "branch"]
+	current = yellow reverse
+	local = yellow
+	remote = green
+
+[color "diff"]
+	meta = yellow bold
+	frag = magenta bold
+	old = red bold
+	new = green bold
+
+[color "status"]
+	added = green
+	changed = yellow
+	untracked = red
+
+# Include context-specific configs if they exist
+[includeIf "gitdir:~/work/"]
+	path = ~/.gitconfig.work
+
+[includeIf "gitdir:~/personal/"]
+	path = ~/.gitconfig.personal

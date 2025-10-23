@@ -1,0 +1,18 @@
+# ~/.gitconfig.personal - Personal Git Configuration
+# This file is automatically included when working in ~/personal directory
+
+[user]
+	name = Your Personal Name
+	email = your.personal@email.com
+	# signingkey = YOUR_GPG_KEY_ID
+
+# [commit]
+# 	gpgsign = true
+
+[core]
+	# Personal-specific core settings
+	sshCommand = ssh -i ~/.ssh/keys/personal/id_ed25519 -F ~/.ssh/config.personal
+
+# Personal-specific aliases
+[alias]
+	# Add any personal-specific aliases here

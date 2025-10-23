@@ -1,0 +1,31 @@
+# ~/.ssh/config.personal - Personal SSH Configuration
+
+# GitHub Personal Account
+Host github.com-personal
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/keys/personal/id_ed25519
+    IdentitiesOnly yes
+    AddKeysToAgent yes
+
+# GitLab Personal Account (if applicable)
+Host gitlab.com-personal
+    HostName gitlab.com
+    User git
+    IdentityFile ~/.ssh/keys/personal/id_ed25519
+    IdentitiesOnly yes
+    AddKeysToAgent yes
+
+# Bitbucket Personal Account (if applicable)
+Host bitbucket.org-personal
+    HostName bitbucket.org
+    User git
+    IdentityFile ~/.ssh/keys/personal/id_ed25519
+    IdentitiesOnly yes
+    AddKeysToAgent yes
+
+# Default settings for all personal hosts
+Host *
+    ServerAliveInterval 60
+    ServerAliveCountMax 30
+    TCPKeepAlive yes

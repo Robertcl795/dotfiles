@@ -1,0 +1,15 @@
+# ~/.ssh/config - Main SSH Configuration
+# This file includes context-specific SSH configurations
+
+# Include work SSH config
+Include ~/.ssh/config.work
+
+# Include personal SSH config
+Include ~/.ssh/config.personal
+
+# Default settings for all hosts
+Host *
+    ServerAliveInterval 60
+    ServerAliveCountMax 30
+    TCPKeepAlive yes
+    Compression yes

@@ -1,0 +1,19 @@
+# ~/.gitconfig.work - Work-specific Git Configuration
+# This file is automatically included when working in ~/work directory
+
+[user]
+	name = Your Work Name
+	email = you@company.com
+	# signingkey = YOUR_GPG_KEY_ID
+
+# [commit]
+# 	gpgsign = true
+
+[core]
+	# Work-specific core settings
+	sshCommand = ssh -i ~/.ssh/keys/work/id_ed25519 -F ~/.ssh/config.work
+
+# Work-specific aliases
+[alias]
+	# Add any work-specific aliases here
+	push-review = push origin HEAD:refs/for/main

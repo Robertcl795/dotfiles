@@ -1,0 +1,22 @@
+# .envrc for ~/work directory
+# This file is automatically loaded by direnv when entering ~/work
+
+# Export SSH context
+export SSH_AUTH_SOCK_CONTEXT="work"
+
+# Load work SSH key
+if [[ -f ~/.ssh/keys/work/id_ed25519 ]]; then
+    ssh-add -D 2>/dev/null || true
+    ssh-add ~/.ssh/keys/work/id_ed25519 2>/dev/null
+fi
+
+# Export Git SSH command for work context
+export GIT_SSH_COMMAND="ssh -i ~/.ssh/keys/work/id_ed25519 -F ~/.ssh/config.work"
+
+# Optional: Set work-specific environment variables
+# export AWS_PROFILE="work"
+# export KUBECONFIG="$HOME/.kube/config-work"
+# export NPM_TOKEN="your-work-npm-token"
+
+# Show context indicator
+echo "🏢 Switched to WORK context"
