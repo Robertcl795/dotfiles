@@ -4,7 +4,7 @@ Modern, modular dotfiles for WSL with Angular development support.
 
 ## Quick Install
 ```bash
-wget -qO- https://raw.githubusercontent.com/YOURUSERNAME/dotfiles/main/bootstrap.sh | bash
+wget -qO- https://raw.githubusercontent.com/Robertcl795/dotfiles/main/bootstrap.sh | bash
 ```
 
 ## Features
