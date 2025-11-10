@@ -18,22 +18,28 @@ declare -gA INSTALL_CONFIG=(
     [zsh]=1
     [cli_tools]=1
     [git_config]=1
+    [ssh_keys]=1
+    [hosts_config]=1
+    [wsl_config]=1
 )
 
 # Component metadata (name:description:required)
 declare -gA COMPONENT_META=(
-    [direnv]="direnv:Environment variable management:0"
-    [mise]="mise:Universal version manager (Node, Python, Rust):0"
+    [mise]="Mise:Universal version manager (Python + Node LTS):0"
+    [cli_tools]="CLI Tools:FZF, Zoxide, Exa, Bat, Ripgrep:0"
+    [zsh]="Zsh + Zinit:Shell with plugins + Starship prompt:0"
+    [direnv]="direnv:Environment variable manager:0"
     [docker]="Docker:Docker and container tools:0"
     [k3d]="K3D + Helm:Kubernetes development cluster:0"
-    [zsh]="Zsh + Zinit:Modern shell with plugins:1"
-    [cli_tools]="CLI Tools:Modern CLI utilities (bat, eza, fzf, zoxide):0"
     [git_config]="Git Config:Git configuration and aliases:0"
+    [ssh_keys]="SSH Keys:Generate SSH keys and add to agent:0"
+    [hosts_config]="/etc/hosts:Add custom hosts entries:0"
+    [wsl_config]="WSL Config:WSL configuration for K3D and Windows:0"
 )
 
 # Get component display order
 get_component_order() {
-    echo "zsh mise cli_tools direnv docker k3d git_config"
+    echo "mise cli_tools zsh direnv docker k3d git_config ssh_keys hosts_config wsl_config"
 }
 
 # Check if a component should be installed
@@ -96,56 +102,58 @@ draw_menu() {
     local selected_idx=$1
     local idx=0
     
-    clear
-    echo
-    echo -e "${CYAN}${BOLD}╔═══════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}${BOLD}║           Dotfiles Installation - Select Tools            ║${NC}"
-    echo -e "${CYAN}${BOLD}╚═══════════════════════════════════════════════════════════╝${NC}"
-    echo
-    echo -e "${DIM}Use ↑/↓ arrows to navigate, Space to toggle, Enter to confirm${NC}"
-    echo -e "${DIM}Press 'a' for all, 'r' for required only${NC}"
-    echo
+    # Save cursor position and use tput to redraw without flicker
+    # Move to home position (0,0) and clear screen content below
+    printf "\033[H\033[J" >&2
+    
+    echo >&2
+    echo -e "${CYAN}${BOLD}╔═══════════════════════════════════════════════════════════╗${NC}" >&2
+    echo -e "${CYAN}${BOLD}║           Dotfiles Installation - Select Tools            ║${NC}" >&2
+    echo -e "${CYAN}${BOLD}╚═══════════════════════════════════════════════════════════╝${NC}" >&2
+    echo >&2
+    echo -e "${DIM}Use ↑/↓ arrows to navigate, Space to toggle, Enter to confirm${NC}" >&2
+    echo -e "${DIM}Press 'a' for all, 'r' for required only, 'q' to quit${NC}" >&2
+    echo >&2
     
     for key in $(get_component_order); do
         local name=$(get_component_name "$key")
         local desc=$(get_component_description "$key")
         local enabled=${INSTALL_CONFIG[$key]}
-        local required=$(is_required "$key")
         
         # Cursor indicator
         if [ $idx -eq $selected_idx ]; then
-            echo -ne "${CYAN}${BOLD}▸${NC} "
+            echo -ne "${CYAN}${BOLD}▸${NC} " >&2
         else
-            echo -n "  "
+            echo -n "  " >&2
         fi
         
         # Checkbox
         if [ $enabled -eq 1 ]; then
-            echo -ne "${GREEN}◉${NC} "
+            echo -ne "${GREEN}◉${NC} " >&2
         else
-            echo -ne "${DIM}○${NC} "
+            echo -ne "${DIM}○${NC} " >&2
         fi
         
         # Name
-        echo -ne "${BOLD}$name${NC}"
+        echo -ne "${BOLD}$name${NC}" >&2
         
-        # Required tag
-        if [ $required -eq 1 ]; then
-            echo -ne " ${RED}[REQUIRED]${NC}"
+        # Required tag (check function return code, not output)
+        if is_required "$key"; then
+            echo -ne " ${RED}[REQUIRED]${NC}" >&2
         fi
         
-        echo
+        echo >&2
         
         # Description (indented)
         if [ $idx -eq $selected_idx ]; then
-            echo -e "     ${DIM}$desc${NC}"
+            echo -e "     ${DIM}$desc${NC}" >&2
         fi
         
         idx=$((idx + 1))
     done
     
-    echo
-    echo -e "${DIM}─────────────────────────────────────────────────────────${NC}"
+    echo >&2
+    echo -e "${DIM}─────────────────────────────────────────────────────────${NC}" >&2
     
     # Show summary
     local enabled_count=0
@@ -155,31 +163,43 @@ draw_menu() {
         fi
     done
     
-    echo -e "Selected: ${GREEN}$enabled_count${NC} / $(get_component_order | wc -w) components"
+    echo -e "Selected: ${GREEN}$enabled_count${NC} / $(get_component_order | wc -w) components" >&2
 }
 
 # Interactive selection menu
 prompt_installation_choices() {
-    if [ ! -t 0 ]; then
-        print_info "Non-interactive mode detected, using defaults"
-        return 0
+    # Always check /dev/tty for terminal availability when piped
+    if [ ! -t 0 ] && [ ! -t 1 ]; then
+        # Completely non-interactive environment
+        if [ ! -c /dev/tty ]; then
+            print_info "Non-interactive mode detected, using defaults"
+            return 0
+        fi
     fi
     
     local selected=0
     local total_items=$(get_component_order | wc -w)
     
+    # Clear screen once at the start
+    clear
+    
     # Hide cursor
-    tput civis
+    tput civis 2>/dev/null || true
     
     while true; do
         draw_menu $selected
         
-        # Read single character
-        read -rsn1 input
+        # Read single character from terminal
+        read -rsn1 input </dev/tty 2>/dev/null || {
+            # If reading fails, fall back to defaults
+            tput cnorm 2>/dev/null || true
+            print_info "Interactive mode unavailable, using defaults"
+            return 0
+        }
         
         # Handle escape sequences (arrow keys)
         if [[ $input == $'\x1b' ]]; then
-            read -rsn2 input
+            read -rsn2 input </dev/tty 2>/dev/null
         fi
         
         case $input in
@@ -228,8 +248,8 @@ prompt_installation_choices() {
                 ;;
             # 'q' or 'Q' - quit
             [qQ])
-                tput cnorm
-                echo
+                tput cnorm 2>/dev/null || true
+                echo >&2
                 print_error "Installation cancelled by user"
                 exit 0
                 ;;
@@ -237,22 +257,22 @@ prompt_installation_choices() {
     done
     
     # Show cursor
-    tput cnorm
+    tput cnorm 2>/dev/null || true
     
     clear
-    echo
+    echo >&2
     print_success "Installation configuration saved"
-    echo
+    echo >&2
     
     # Show summary
-    print_info "Selected components:"
+    print_info "☑  Selected components:"
     for key in $(get_component_order); do
         if should_install "$key"; then
             local name=$(get_component_name "$key")
-            echo -e "  ${GREEN}✓${NC} $name"
+            echo -e "  ${GREEN}✓${NC} $name" >&2
         fi
     done
-    echo
+    echo >&2
 }
 
 # Export functions

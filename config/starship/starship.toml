@@ -151,10 +151,12 @@ format = "via [$symbol$version]($style) "
 style = "bold 208"
 display_private = false
 
-[pnpm]
-symbol = " "
-format = "via [$symbol($version )]($style)"
-style = "bold yellow"
+# Note: pnpm module requires Starship v1.10.0+
+# If you see warnings, your Starship version doesn't support it yet
+# [pnpm]
+# symbol = " "
+# format = "via [$symbol($version )]($style)"
+# style = "bold yellow"
 
 # ============================================================================
 # Environment & Tools

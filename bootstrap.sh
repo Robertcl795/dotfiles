@@ -12,9 +12,10 @@ INSTALL_ARGS=()
 
 # Colors (optional)
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
-print_info(){ echo -e "${BLUE}[INFO]${NC} $*"; }
-print_success(){ echo -e "${GREEN}[SUCCESS]${NC} $*"; }
-print_warning(){ echo -e "${YELLOW}[WARN]${NC} $*"; }
+print_info(){ echo -e "${BLUE}[INFO]${NC} $*" >&2; }
+print_success(){ echo -e "${GREEN}[SUCCESS]${NC} $*" >&2; }
+print_warning(){ echo -e "${YELLOW}[WARN]${NC} $*" >&2; }
+print_error(){ echo -e "${RED}[ERROR]${NC} $*" >&2; }
 
 # Basic arg pass-through (collect and forward to install.sh)
 while [ $# -gt 0 ]; do
@@ -28,7 +29,7 @@ done
 
 # Prevent root
 if [ "$(id -u)" -eq 0 ]; then
-  echo -e "${RED}Do not run this script as root. Clone and run as your regular user.${NC}"
+  print_error "Do not run this script as root. Clone and run as your regular user."
   exit 1
 fi
 
@@ -42,7 +43,7 @@ if ! command -v git >/dev/null 2>&1; then
   elif command -v pacman >/dev/null 2>&1; then
     sudo pacman -Sy --noconfirm git
   else
-    echo -e "${RED}No supported package manager found to install git. Aborting.${NC}"
+    print_error "No supported package manager found to install git. Aborting."
     exit 1
   fi
 fi
@@ -63,5 +64,12 @@ cd "$DOTFILES_DIR"
 # Ensure installer executable
 chmod +x install.sh
 
-# Execute installer and forward args (use exec so signals/exit propagate)
-exec ./install.sh "${INSTALL_ARGS[@]}"
+# If piped from curl, we need to restore stdin from terminal for interactive prompts
+# This is critical for making the menu work when running: curl ... | bash
+if [ ! -t 0 ]; then
+  print_info "Detected piped execution, restoring terminal for interactive prompts..."
+  exec ./install.sh "${INSTALL_ARGS[@]}" </dev/tty
+else
+  # Execute installer normally
+  exec ./install.sh "${INSTALL_ARGS[@]}"
+fi

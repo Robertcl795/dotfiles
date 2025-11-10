@@ -24,6 +24,7 @@ export XDG_CACHE_HOME="$HOME/.cache"
 # Path configuration
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/bin:$PATH"
+export PATH="$HOME/.fzf/bin:$PATH"
 
 # ============================================================================
 # Zinit Installation and Configuration
@@ -31,7 +32,7 @@ export PATH="$HOME/bin:$PATH"
 
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 
-if [[ ! -d $ZINIT_HOME ]]; then
+if [ ! -d "$ZINIT_HOME" ]; then
    mkdir -p "$(dirname $ZINIT_HOME)"
    git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
 fi
@@ -45,36 +46,29 @@ source "${ZINIT_HOME}/zinit.zsh"
 # Turbo mode - load plugins asynchronously
 # Ref: https://github.com/zdharma-continuum/zinit#turbo-mode-zsh--53
 
-# Load important plugins first (non-turbo)
-zinit light-mode for \
-    zdharma-continuum/zinit-annex-as-monitor \
-    zdharma-continuum/zinit-annex-bin-gem-node \
-    zdharma-continuum/zinit-annex-patch-dl \
-    zdharma-continuum/zinit-annex-rust
+# Syntax highlighting and completions (using HTTPS to avoid SSH key requirement)
+zinit ice wait lucid
+zinit light https://github.com/zsh-users/zsh-syntax-highlighting
 
-# Syntax highlighting (load early)
-zinit wait lucid for \
-    atinit"ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay" \
-        zdharma-continuum/fast-syntax-highlighting \
-    blockf \
-        zsh-users/zsh-completions \
-    atload"!_zsh_autosuggest_start" \
-        zsh-users/zsh-autosuggestions
+zinit ice wait lucid
+zinit light https://github.com/zsh-users/zsh-completions
 
-# FZF tab completion
-zinit wait lucid for \
-    Aloxaf/fzf-tab
+zinit ice wait lucid
+zinit light https://github.com/zsh-users/zsh-autosuggestions
 
-# Useful snippets and plugins
+zinit ice wait lucid
+zinit light https://github.com/Aloxaf/fzf-tab
+
+# Oh My Zsh plugins and snippets
 zinit wait lucid for \
     OMZL::git.zsh \
     OMZP::git \
     OMZP::docker \
     OMZP::docker-compose \
     OMZP::kubectl \
-    OMZP::helm \
-    as"completion" \
-        OMZP::docker/_docker
+    OMZP::helm
+
+zinit cdreplay -q
 
 # ============================================================================
 # History Configuration
@@ -185,9 +179,20 @@ if command -v zoxide &> /dev/null; then
 fi
 
 # fzf configuration
+if [ -f ~/.fzf.zsh ]; then
+    source ~/.fzf.zsh
+elif command -v fzf &> /dev/null; then
+    # Fallback: source key bindings and completion manually if installed differently
+    if [ -f ~/.fzf/shell/key-bindings.zsh ]; then
+        source ~/.fzf/shell/key-bindings.zsh
+    fi
+    if [ -f ~/.fzf/shell/completion.zsh ]; then
+        source ~/.fzf/shell/completion.zsh
+    fi
+fi
+
+# FZF configuration (if available)
 if command -v fzf &> /dev/null; then
-    source <(fzf --zsh)
-    
     # Use fd for fzf
     if command -v fd &> /dev/null; then
         export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
@@ -222,88 +227,11 @@ fi
 # Docker and Kubernetes
 # ============================================================================
 
-# Docker aliases
-if command -v docker &> /dev/null; then
-    alias d='docker'
-    alias dc='docker-compose'
-    alias dps='docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
-    alias dimg='docker images'
-    alias dprune='docker system prune -af'
-fi
-
 # K3D aliases
 if command -v k3d &> /dev/null; then
     alias k3d-create='k3d cluster create dev --agents 2'
     alias k3d-delete='k3d cluster delete dev'
 fi
-
-# Kubectl aliases
-if command -v kubectl &> /dev/null; then
-    alias k='kubectl'
-    alias kgp='kubectl get pods'
-    alias kgs='kubectl get services'
-    alias kgd='kubectl get deployments'
-    alias kl='kubectl logs'
-    alias kx='kubectl exec -it'
-    alias kd='kubectl describe'
-fi
-
-# Helm aliases
-if command -v helm &> /dev/null; then
-    alias h='helm'
-    alias hl='helm list'
-    alias hi='helm install'
-    alias hu='helm upgrade'
-fi
-
-# ============================================================================
-# Git Aliases
-# ============================================================================
-
-alias g='git'
-alias gs='git status'
-alias ga='git add'
-alias gaa='git add --all'
-alias gc='git commit -v'
-alias gcm='git commit -m'
-alias gp='git push'
-alias gpl='git pull'
-alias gl='git log --oneline --decorate --graph --all'
-alias gd='git diff'
-alias gco='git checkout'
-alias gcb='git checkout -b'
-alias gb='git branch'
-alias gba='git branch -a'
-alias gbd='git branch -d'
-alias gst='git stash'
-alias gstp='git stash pop'
-
-# ============================================================================
-# Angular Development Aliases
-# ============================================================================
-
-# pnpm aliases
-if command -v pnpm &> /dev/null; then
-    alias p='pnpm'
-    alias pi='pnpm install'
-    alias pa='pnpm add'
-    alias pd='pnpm dev'
-    alias pb='pnpm build'
-    alias pt='pnpm test'
-    alias pl='pnpm lint'
-    alias pf='pnpm format'
-    
-    # Workspace commands
-    alias pw='pnpm --filter'
-    alias pr='pnpm -r'
-fi
-
-# Angular aliases
-alias ng='pnpm exec ng'
-alias ngs='pnpm exec ng serve'
-alias ngb='pnpm exec ng build'
-alias ngt='pnpm exec ng test'
-alias ngg='pnpm exec ng generate'
 
 # ============================================================================
 # Utility Functions
@@ -334,12 +262,6 @@ extract() {
     else
         echo "'$1' is not a valid file"
     fi
-}
-
-# Quick server
-serve() {
-    local port="${1:-8000}"
-    python3 -m http.server "$port"
 }
 
 # Find and kill process by port
