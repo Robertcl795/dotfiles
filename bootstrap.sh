@@ -7,7 +7,11 @@ set -euo pipefail
 #   OR cloned: ./bootstrap.sh
 
 DOTFILES_REPO="https://github.com/Robertcl795/dotfiles.git"
-SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SOURCE_PATH="${BASH_SOURCE[0]:-${0:-}}"
+if [ -z "$SOURCE_PATH" ]; then
+  SOURCE_PATH="$PWD"
+fi
+SCRIPT_DIR="$(cd -- "$(dirname "$SOURCE_PATH")" && pwd)"
 
 if [ -d "$SCRIPT_DIR/.git" ] || [ -d "$SCRIPT_DIR/install" ]; then
   DOTFILES_DIR="${DOTFILES_DIR:-$SCRIPT_DIR}"

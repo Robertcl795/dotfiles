@@ -5,7 +5,7 @@ command_timeout = 500
 
 format = """
 [>>](bold green) $username$hostname$directory$git_branch$git_status$nodejs$python$rust$docker_context$kubernetes
-[$](bold green) $character"""
+[\\$](bold green) $character"""
 
 right_format = """$cmd_duration"""
 

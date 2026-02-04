@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-source "$(cd -- "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/common.sh"
+SOURCE_PATH="${BASH_SOURCE[0]:-${0:-}}"
+if [ -z "$SOURCE_PATH" ]; then
+  SOURCE_PATH="$PWD"
+fi
+SCRIPT_DIR="$(cd -- "$(dirname "$SOURCE_PATH")" && pwd)"
+source "$SCRIPT_DIR/../common.sh"
 
 install_packages_ubuntu() {
   log_step "Phase 1: System update + base packages (Ubuntu)"
