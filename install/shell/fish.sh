@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source "$(cd -- "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/common.sh"
+
+install_fish() {
+  log_step "Phase 3: Shell setup (fish)"
+
+  if ! ensure_cmd fish; then
+    case "${DOT_OS:-}" in
+      ubuntu) sudo apt-get install -y fish ;;
+      arch) sudo pacman -S --noconfirm --needed fish ;;
+      *) die "Unknown OS for fish install" ;;
+    esac
+  fi
+
+  if [ ! -d "$HOME/.config/fish" ]; then
+    mkdir -p "$HOME/.config/fish"
+  fi
+
+  if [ ! -f "$HOME/.config/fish/functions/fisher.fish" ]; then
+    log_info "Installing fisher plugin manager."
+    curl -fsSL https://git.io/fisher | fish -c 'source; and fisher install jorgebucaran/fisher'
+  fi
+
+  fish -c "fisher install PatrickF1/fzf.fish" >/dev/null 2>&1 || true
+
+  if [ "$DOT_SHELL" = "fish" ] && ensure_cmd chsh; then
+    if [ "$DOT_NONINTERACTIVE" = "1" ]; then
+      log_warn "Skipping default shell change in non-interactive mode."
+    else
+      if confirm "Set fish as default shell?" "n"; then
+        chsh -s "$(command -v fish)" || log_warn "Unable to change default shell."
+      fi
+    fi
+  fi
+}
+
+if [ "${1:-}" = "--run" ]; then
+  install_fish
+fi

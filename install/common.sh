@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_DIR="${DOTFILES_DIR:-$(cd -- "$SCRIPT_DIR/.." && pwd)}"
+
+DOT_NONINTERACTIVE="${DOT_NONINTERACTIVE:-0}"
+DOT_VERBOSE="${DOT_VERBOSE:-0}"
+DOT_SHELL="${DOT_SHELL:-}"
+DOT_THEME="${DOT_THEME:-}"
+DOT_ENABLE_K8S="${DOT_ENABLE_K8S:-}"
+DOT_ENABLE_TMUX="${DOT_ENABLE_TMUX:-}"
+
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; CYAN='\033[0;36m'; NC='\033[0m'
+
+log_info() { echo -e "${BLUE}[INFO]${NC} $*" >&2; }
+log_warn() { echo -e "${YELLOW}[WARN]${NC} $*" >&2; }
+log_error() { echo -e "${RED}[ERROR]${NC} $*" >&2; }
+log_step() { echo -e "${CYAN}==>${NC} $*" >&2; }
+
+die() { log_error "$*"; exit 1; }
+
+is_tty() { [ -t 0 ] && [ -t 1 ]; }
+
+confirm() {
+  local prompt="${1:-Continue?}"
+  local default="${2:-y}"
+  if [ "$DOT_NONINTERACTIVE" = "1" ] || ! is_tty; then
+    [ "$default" = "y" ] && return 0 || return 1
+  fi
+  local suffix
+  if [ "$default" = "y" ]; then
+    suffix="(Y/n)"
+  else
+    suffix="(y/N)"
+  fi
+  read -r -p "$prompt $suffix " reply </dev/tty
+  if [ "$default" = "y" ]; then
+    [[ "$reply" =~ ^[Nn]$ ]] && return 1 || return 0
+  else
+    [[ "$reply" =~ ^[Yy]$ ]] && return 0 || return 1
+  fi
+}
+
+backup_path() {
+  local target="$1"
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    local ts
+    ts="$(date +%Y%m%d_%H%M%S)"
+    local backup="${target}.backup.${ts}"
+    log_warn "Backing up $target -> $backup"
+    mv "$target" "$backup"
+  fi
+}
+
+symlink_with_backup() {
+  local src="$1"
+  local dest="$2"
+  mkdir -p "$(dirname "$dest")"
+  if [ -L "$dest" ]; then
+    local current
+    current="$(readlink "$dest")"
+    if [ "$current" = "$src" ]; then
+      return 0
+    fi
+  fi
+  if [ -e "$dest" ] || [ -L "$dest" ]; then
+    backup_path "$dest"
+  fi
+  ln -s "$src" "$dest"
+}
+
+ensure_cmd() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+run() {
+  if [ "$DOT_VERBOSE" = "1" ]; then
+    log_step "$*"
+  fi
+  "$@"
+}
+
+detect_arch() {
+  case "$(uname -m)" in
+    x86_64|amd64) echo "amd64" ;;
+    aarch64|arm64) echo "arm64" ;;
+    *) echo "amd64" ;;
+  esac
+}
+
+select_shell() {
+  if [ -n "$DOT_SHELL" ]; then
+    return 0
+  fi
+  if [ "$DOT_NONINTERACTIVE" = "1" ] || ! is_tty; then
+    DOT_SHELL="zsh"
+    return 0
+  fi
+  log_info "Choose a shell:"
+  echo "1) fish"
+  echo "2) zsh"
+  read -r -p "Select [1-2] (default 2): " choice </dev/tty
+  case "$choice" in
+    1) DOT_SHELL="fish" ;;
+    2|"") DOT_SHELL="zsh" ;;
+    *) DOT_SHELL="zsh" ;;
+  esac
+}
+
+select_theme() {
+  if [ -n "$DOT_THEME" ]; then
+    return 0
+  fi
+  if [ "$DOT_NONINTERACTIVE" = "1" ] || ! is_tty; then
+    DOT_THEME="cyber"
+    return 0
+  fi
+  log_info "Choose a Starship theme:"
+  echo "1) tron"
+  echo "2) cyber"
+  echo "3) eva01"
+  read -r -p "Select [1-3] (default 2): " choice </dev/tty
+  case "$choice" in
+    1) DOT_THEME="tron" ;;
+    2|"") DOT_THEME="cyber" ;;
+    3) DOT_THEME="eva01" ;;
+    *) DOT_THEME="cyber" ;;
+  esac
+}
+
+export DOTFILES_DIR DOT_NONINTERACTIVE DOT_VERBOSE DOT_SHELL DOT_THEME DOT_ENABLE_K8S DOT_ENABLE_TMUX

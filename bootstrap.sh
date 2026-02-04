@@ -3,11 +3,18 @@ set -euo pipefail
 
 # Bootstrap script for dotfiles installation
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/Robertcl795/dotfiles/main/bootstrap.sh | bash -s -- [--yes]
-#   OR cloned: ./bootstrap.sh [--yes]
+#   curl -fsSL https://raw.githubusercontent.com/Robertcl795/dotfiles/main/bootstrap.sh | bash
+#   OR cloned: ./bootstrap.sh
 
 DOTFILES_REPO="https://github.com/Robertcl795/dotfiles.git"
-DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
+SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if [ -d "$SCRIPT_DIR/.git" ] || [ -d "$SCRIPT_DIR/install" ]; then
+  DOTFILES_DIR="${DOTFILES_DIR:-$SCRIPT_DIR}"
+else
+  DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
+fi
+
 INSTALL_ARGS=()
 
 # Colors (optional)
@@ -17,12 +24,16 @@ print_success(){ echo -e "${GREEN}[SUCCESS]${NC} $*" >&2; }
 print_warning(){ echo -e "${YELLOW}[WARN]${NC} $*" >&2; }
 print_error(){ echo -e "${RED}[ERROR]${NC} $*" >&2; }
 
-# Basic arg pass-through (collect and forward to install.sh)
+# Basic arg pass-through (collect and forward to install/run.sh)
 while [ $# -gt 0 ]; do
   case "$1" in
-    --yes|-y) INSTALL_ARGS+=("--yes"); shift ;;
-    --install-dir) INSTALL_ARGS+=("--install-dir"); INSTALL_ARGS+=("$2"); shift 2 ;;
-    --no-tty) INSTALL_ARGS+=("--no-tty"); shift ;;
+    --noninteractive) export DOT_NONINTERACTIVE=1; shift ;;
+    --shell) export DOT_SHELL="$2"; shift 2 ;;
+    --theme) export DOT_THEME="$2"; shift 2 ;;
+    --enable-k8s) export DOT_ENABLE_K8S=1; shift ;;
+    --disable-k8s) export DOT_ENABLE_K8S=0; shift ;;
+    --enable-tmux) export DOT_ENABLE_TMUX=1; shift ;;
+    --disable-tmux) export DOT_ENABLE_TMUX=0; shift ;;
     *) INSTALL_ARGS+=("$1"); shift ;;
   esac
 done
@@ -49,9 +60,11 @@ if ! command -v git >/dev/null 2>&1; then
 fi
 
 # Clone or update repo
-if [ -d "$DOTFILES_DIR" ]; then
+if [ -d "$DOTFILES_DIR/.git" ]; then
   print_info "Found existing $DOTFILES_DIR — pulling updates..."
   (cd "$DOTFILES_DIR" && git pull --rebase --autostash) || true
+elif [ -d "$DOTFILES_DIR" ] && [ "$(ls -A "$DOTFILES_DIR" 2>/dev/null | wc -l)" -gt 0 ]; then
+  print_warning "$DOTFILES_DIR exists and is not empty; using it without cloning."
 else
   print_info "Cloning dotfiles into $DOTFILES_DIR..."
   git clone --depth=1 "$DOTFILES_REPO" "$DOTFILES_DIR"
@@ -60,16 +73,13 @@ fi
 # Export DOTFILES_DIR for child scripts and run installer forwarding args
 export DOTFILES_DIR
 cd "$DOTFILES_DIR"
-
-# Ensure installer executable
-chmod +x install.sh
+chmod +x install/run.sh
 
 # If piped from curl, we need to restore stdin from terminal for interactive prompts
 # This is critical for making the menu work when running: curl ... | bash
 if [ ! -t 0 ]; then
   print_info "Detected piped execution, restoring terminal for interactive prompts..."
-  exec ./install.sh "${INSTALL_ARGS[@]}" </dev/tty
+  exec ./install/run.sh "${INSTALL_ARGS[@]}" </dev/tty
 else
-  # Execute installer normally
-  exec ./install.sh "${INSTALL_ARGS[@]}"
+  exec ./install/run.sh "${INSTALL_ARGS[@]}"
 fi
