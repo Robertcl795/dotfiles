@@ -1,4 +1,4 @@
-.PHONY: help install update test uninstall backup clean configure
+.PHONY: help install update test uninstall backup clean configure sync-radleylewis
 
 # Default target
 help:
@@ -48,3 +48,8 @@ clean:
 	@echo "🧹 Cleaning backup files..."
 	@rm -rf backup/*
 	@echo "✓ Backup files cleaned"
+
+sync-radleylewis:
+	@echo "🔄 Syncing vendored radleylewis config from upstream..."
+	@bash install/shell/radleylewis.sh --run
+

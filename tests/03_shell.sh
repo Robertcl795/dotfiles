@@ -12,3 +12,7 @@ fi
 
 fish -lc "echo ok" >/dev/null
 zsh -lic "echo ok" >/dev/null
+
+# radleylewis-based config must load its aliases and plugin loader
+zsh -lic "type ll >/dev/null && type zplugin-update >/dev/null" \
+  || { echo "zsh did not load the radleylewis base config." >&2; exit 1; }

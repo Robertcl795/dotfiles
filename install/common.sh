@@ -157,11 +157,13 @@ select_theme() {
   echo "1) tron"
   echo "2) cyber"
   echo "3) eva01"
-  read -r -p "Select [1-3] (default 2): " choice </dev/tty
+  echo "4) radley"
+  read -r -p "Select [1-4] (default 2): " choice </dev/tty
   case "$choice" in
     1) DOT_THEME="tron" ;;
     2|"") DOT_THEME="cyber" ;;
     3) DOT_THEME="eva01" ;;
+    4) DOT_THEME="radley" ;;
     *) DOT_THEME="cyber" ;;
   esac
 }
