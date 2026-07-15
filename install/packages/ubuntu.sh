@@ -48,7 +48,45 @@ install_packages_ubuntu() {
     ln -sf "$(command -v exa)" "$HOME/.local/bin/eza"
   fi
 
+  install_cli_extras_ubuntu
+
   log_info "Base packages installed."
+}
+
+# Core CLI extras. Ubuntu's apt archive lags behind Arch, so tools missing
+# from apt come from GitHub release binaries (versions overridable via env).
+install_cli_extras_ubuntu() {
+  log_step "Core CLI extras (lazygit, glow, duf, lazydocker, yazi, sshs, lnav, just, zellij)"
+
+  sudo apt-get install -y duf just lnav || log_warn "apt could not install duf/just/lnav; continuing."
+
+  local arch rust_arch
+  arch="$(detect_arch)"
+  case "$arch" in
+    arm64) rust_arch="aarch64" ;;
+    *) rust_arch="x86_64" ;;
+  esac
+
+  local lazygit_ver="${DOT_LAZYGIT_VERSION:-0.44.1}"
+  local glow_ver="${DOT_GLOW_VERSION:-2.1.0}"
+  local lazydocker_ver="${DOT_LAZYDOCKER_VERSION:-0.24.1}"
+  local goarch_suffix
+  case "$arch" in
+    arm64) goarch_suffix="Linux_arm64" ;;
+    *) goarch_suffix="Linux_x86_64" ;;
+  esac
+
+  install_release_bin lazygit "https://github.com/jesseduffield/lazygit/releases/download/v${lazygit_ver}/lazygit_${lazygit_ver}_${goarch_suffix}.tar.gz"
+  install_release_bin glow "https://github.com/charmbracelet/glow/releases/download/v${glow_ver}/glow_${glow_ver}_${goarch_suffix}.tar.gz"
+  install_release_bin lazydocker "https://github.com/jesseduffield/lazydocker/releases/download/v${lazydocker_ver}/lazydocker_${lazydocker_ver}_${goarch_suffix}.tar.gz"
+  install_release_bin zellij "https://github.com/zellij-org/zellij/releases/latest/download/zellij-${rust_arch}-unknown-linux-musl.tar.gz"
+  install_release_bin yazi "https://github.com/sxyazi/yazi/releases/latest/download/yazi-${rust_arch}-unknown-linux-gnu.zip"
+  install_release_bin sshs "https://github.com/quantumsheep/sshs/releases/latest/download/sshs-linux-${arch}"
+
+  if ! ensure_cmd duf; then
+    local duf_ver="${DOT_DUF_VERSION:-0.8.1}"
+    install_release_bin duf "https://github.com/muesli/duf/releases/download/v${duf_ver}/duf_${duf_ver}_linux_${arch}.tar.gz"
+  fi
 }
 
 if [ "${1:-}" = "--run" ]; then

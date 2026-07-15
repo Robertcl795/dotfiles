@@ -1,55 +1,74 @@
+# ~/.zshrc — entrypoint (symlinked from shells/zsh/zshrc)
+# Base configuration vendored from radleylewis/zsh lives in
+# config/zsh/radleylewis/; local overrides go in shells/zsh/aliases.zsh
+# or ~/.zshrc.local.
+
+# =========================================================
+# Environment
+# =========================================================
+
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+
+export EDITOR="nvim"
+export VISUAL="nvim"
+
+if command -v bat >/dev/null 2>&1; then
+  export MANPAGER="bat -l man -p"
+fi
 
 if [ -d "$HOME/.local/bin" ]; then
   export PATH="$HOME/.local/bin:$PATH"
 fi
 
-DOTFILES_DIR="${DOTFILES_DIR:-${0:A:h:h:h}}"
-
-ZINIT_HOME="${XDG_DATA_HOME}/zinit/zinit.git"
-if [ -s "$ZINIT_HOME/zinit.zsh" ]; then
-  source "$ZINIT_HOME/zinit.zsh"
-  zinit light zsh-users/zsh-autosuggestions
-  zinit light zsh-users/zsh-syntax-highlighting
-  zinit light Aloxaf/fzf-tab
-  zinit light zsh-users/zsh-completions
-else
-  echo "zinit not found at $ZINIT_HOME. Run bootstrap to install."
+# Resolve the repo root by following the ~/.zshrc symlink
+# (shells/zsh/zshrc -> repo root is three levels up).
+if [ -z "${DOTFILES_DIR:-}" ]; then
+  _zshrc_real="$(readlink -f "${ZDOTDIR:-$HOME}/.zshrc" 2>/dev/null)"
+  DOTFILES_DIR="${_zshrc_real:h:h:h}"
+  unset _zshrc_real
 fi
 
-autoload -Uz compinit
-mkdir -p "$XDG_CACHE_HOME/zsh"
-compinit -d "$XDG_CACHE_HOME/zsh/zcompdump"
+# =========================================================
+# Base config (vendored from radleylewis/zsh, see config/zsh/radleylewis/)
+# Order matters: bindings must run before plugins (zsh-vi-mode reads its
+# ZVM_* settings at load time).
+# =========================================================
 
-if [ -f "/usr/share/fzf/key-bindings.zsh" ]; then
-  source "/usr/share/fzf/key-bindings.zsh"
-fi
-if [ -f "/usr/share/fzf/completion.zsh" ]; then
-  source "/usr/share/fzf/completion.zsh"
-fi
-if [ -f "/usr/share/doc/fzf/examples/key-bindings.zsh" ]; then
-  source "/usr/share/doc/fzf/examples/key-bindings.zsh"
-fi
-if [ -f "/usr/share/doc/fzf/examples/completion.zsh" ]; then
-  source "/usr/share/doc/fzf/examples/completion.zsh"
-fi
+RL_ZSH_DIR="$DOTFILES_DIR/config/zsh/radleylewis"
+for _rl_module in core fzf aliases bindings plugins prompt; do
+  [ -f "$RL_ZSH_DIR/${_rl_module}.zsh" ] && source "$RL_ZSH_DIR/${_rl_module}.zsh"
+done
+unset _rl_module
 
-export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git/*"'
-
-if command -v starship >/dev/null 2>&1; then
-  eval "$(starship init zsh)"
-fi
-
-if command -v zoxide >/dev/null 2>&1; then
-  eval "$(zoxide init zsh)"
-fi
+# =========================================================
+# Version managers & dev environment
+# =========================================================
 
 if command -v mise >/dev/null 2>&1; then
   eval "$(mise activate zsh)"
 fi
 
+if [ -f "$DOTFILES_DIR/config/zsh/dev.zsh" ]; then
+  source "$DOTFILES_DIR/config/zsh/dev.zsh"
+fi
+
+# =========================================================
+# WSL helpers (filesystem performance guard, interop aliases)
+# =========================================================
+
+if [ -f "$DOTFILES_DIR/config/zsh/wsl.zsh" ]; then
+  source "$DOTFILES_DIR/config/zsh/wsl.zsh"
+fi
+
+# =========================================================
+# Local overrides
+# =========================================================
+
 if [ -f "$DOTFILES_DIR/shells/zsh/aliases.zsh" ]; then
   source "$DOTFILES_DIR/shells/zsh/aliases.zsh"
 fi
+
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local

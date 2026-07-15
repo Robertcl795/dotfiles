@@ -14,7 +14,9 @@ for t in \
   "$SCRIPT_DIR/03_shell.sh" \
   "$SCRIPT_DIR/04_prompt.sh" \
   "$SCRIPT_DIR/05_nvim.sh" \
-  "$SCRIPT_DIR/06_dev.sh"
+  "$SCRIPT_DIR/06_dev.sh" \
+  "$SCRIPT_DIR/07_devstack.sh" \
+  "$SCRIPT_DIR/08_wsl.sh"
 do
   bash "$t"
 done

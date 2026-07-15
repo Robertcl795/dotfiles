@@ -18,6 +18,17 @@ require zoxide
 require nvim
 require starship
 
+# Core CLI stack (Phase 1)
+require lazygit
+require glow
+require duf
+require lazydocker
+require yazi
+require sshs
+require lnav
+require just
+require zellij
+
 if ! command -v fd >/dev/null 2>&1 && ! command -v fdfind >/dev/null 2>&1; then
   echo "Missing fd or fdfind." >&2
   exit 1
