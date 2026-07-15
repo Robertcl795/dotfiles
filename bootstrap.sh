@@ -39,6 +39,8 @@ while [ $# -gt 0 ]; do
     --enable-tmux|--disable-tmux)
       print_warning "tmux support was replaced by Zellij; '$1' is deprecated and ignored."
       shift ;;
+    --enable-wslconfig) export DOT_ENABLE_WSLCONFIG=1; shift ;;
+    --disable-wslconfig) export DOT_ENABLE_WSLCONFIG=0; shift ;;
     *) INSTALL_ARGS+=("$1"); shift ;;
   esac
 done
@@ -50,6 +52,16 @@ if [ "$(id -u)" -eq 0 ]; then
 fi
 
 print_info "Starting dotfiles bootstrap..."
+
+# WSL: warn early when installing onto the slow NTFS side
+if grep -qi microsoft /proc/version 2>/dev/null; then
+  case "$DOTFILES_DIR" in
+    /mnt/*)
+      print_warning "DOTFILES_DIR ($DOTFILES_DIR) is on a Windows NTFS mount."
+      print_warning "WSL2 cross-OS I/O is 10-20x slower; install under ~/ instead (e.g. DOTFILES_DIR=\$HOME/.dotfiles)."
+      ;;
+  esac
+fi
 
 # Ensure git is present (install minimal if not)
 if ! command -v git >/dev/null 2>&1; then
