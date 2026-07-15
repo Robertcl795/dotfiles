@@ -48,6 +48,8 @@ bash "$DOTFILES_DIR/install/nvim.sh" --run
 bash "$DOTFILES_DIR/install/dev/mise.sh" --run
 bash "$DOTFILES_DIR/install/dev/k8s.sh" --run
 bash "$DOTFILES_DIR/install/zellij.sh" --run
+bash "$DOTFILES_DIR/install/dev/lang.sh" --run
+bash "$DOTFILES_DIR/install/dev/ai.sh" --run
 
 if [ -d "$DOTFILES_DIR/tests" ]; then
   chmod +x "$DOTFILES_DIR/tests/"*.sh 2>/dev/null || true
