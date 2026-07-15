@@ -13,7 +13,6 @@ DOT_VERBOSE="${DOT_VERBOSE:-0}"
 DOT_SHELL="${DOT_SHELL:-}"
 DOT_THEME="${DOT_THEME:-}"
 DOT_ENABLE_K8S="${DOT_ENABLE_K8S:-}"
-DOT_ENABLE_TMUX="${DOT_ENABLE_TMUX:-}"
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; CYAN='\033[0;36m'; NC='\033[0m'
 
@@ -93,6 +92,40 @@ detect_arch() {
   esac
 }
 
+# Install a single binary from a GitHub release asset into ~/.local/bin.
+# Handles .tar.gz/.tgz, .zip and raw binary assets.
+# Usage: install_release_bin <binary-name> <asset-url>
+install_release_bin() {
+  local name="$1" url="$2" tmp bin
+  if ensure_cmd "$name"; then
+    return 0
+  fi
+  log_info "Installing $name from $url"
+  tmp="$(mktemp -d)"
+  case "$url" in
+    *.tar.gz|*.tgz)
+      curl -fsSL "$url" | tar -xz -C "$tmp" || { rm -rf "$tmp"; log_warn "Download failed for $name"; return 1; }
+      ;;
+    *.zip)
+      curl -fsSL -o "$tmp/pkg.zip" "$url" && unzip -q "$tmp/pkg.zip" -d "$tmp" || { rm -rf "$tmp"; log_warn "Download failed for $name"; return 1; }
+      rm -f "$tmp/pkg.zip"
+      ;;
+    *)
+      curl -fsSL -o "$tmp/$name" "$url" || { rm -rf "$tmp"; log_warn "Download failed for $name"; return 1; }
+      ;;
+  esac
+  bin="$(find "$tmp" -type f \( -name "$name" -o -name "$name-*" \) | head -1)"
+  if [ -z "$bin" ]; then
+    rm -rf "$tmp"
+    log_warn "No $name binary found in release asset."
+    return 1
+  fi
+  mkdir -p "$HOME/.local/bin"
+  install -m 0755 "$bin" "$HOME/.local/bin/$name"
+  rm -rf "$tmp"
+  log_info "$name installed to ~/.local/bin/$name"
+}
+
 select_shell() {
   if [ -n "$DOT_SHELL" ]; then
     return 0
@@ -133,4 +166,4 @@ select_theme() {
   esac
 }
 
-export DOTFILES_DIR DOT_NONINTERACTIVE DOT_VERBOSE DOT_SHELL DOT_THEME DOT_ENABLE_K8S DOT_ENABLE_TMUX
+export DOTFILES_DIR DOT_NONINTERACTIVE DOT_VERBOSE DOT_SHELL DOT_THEME DOT_ENABLE_K8S

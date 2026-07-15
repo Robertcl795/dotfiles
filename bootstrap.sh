@@ -36,8 +36,9 @@ while [ $# -gt 0 ]; do
     --theme) export DOT_THEME="$2"; shift 2 ;;
     --enable-k8s) export DOT_ENABLE_K8S=1; shift ;;
     --disable-k8s) export DOT_ENABLE_K8S=0; shift ;;
-    --enable-tmux) export DOT_ENABLE_TMUX=1; shift ;;
-    --disable-tmux) export DOT_ENABLE_TMUX=0; shift ;;
+    --enable-tmux|--disable-tmux)
+      print_warning "tmux support was replaced by Zellij; '$1' is deprecated and ignored."
+      shift ;;
     *) INSTALL_ARGS+=("$1"); shift ;;
   esac
 done

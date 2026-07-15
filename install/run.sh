@@ -22,21 +22,13 @@ if [ "$DOT_NONINTERACTIVE" != "1" ] && is_tty; then
       DOT_ENABLE_K8S=0
     fi
   fi
-  if [ -z "${DOT_ENABLE_TMUX:-}" ]; then
-    if confirm "Enable tmux?" "n"; then
-      DOT_ENABLE_TMUX=1
-    else
-      DOT_ENABLE_TMUX=0
-    fi
-  fi
 else
   DOT_ENABLE_K8S="${DOT_ENABLE_K8S:-1}"
-  DOT_ENABLE_TMUX="${DOT_ENABLE_TMUX:-0}"
   select_shell
   select_theme
 fi
 
-export DOT_ENABLE_K8S DOT_ENABLE_TMUX
+export DOT_ENABLE_K8S
 
 source "$DOTFILES_DIR/install/detect_os.sh"
 detect_os
@@ -55,7 +47,7 @@ bash "$DOTFILES_DIR/install/prompt/starship.sh" --run
 bash "$DOTFILES_DIR/install/nvim.sh" --run
 bash "$DOTFILES_DIR/install/dev/mise.sh" --run
 bash "$DOTFILES_DIR/install/dev/k8s.sh" --run
-bash "$DOTFILES_DIR/install/tmux.sh" --run
+bash "$DOTFILES_DIR/install/zellij.sh" --run
 
 if [ -d "$DOTFILES_DIR/tests" ]; then
   chmod +x "$DOTFILES_DIR/tests/"*.sh 2>/dev/null || true
