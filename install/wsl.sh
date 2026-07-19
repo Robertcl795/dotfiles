@@ -67,9 +67,21 @@ set_ini_key() {
 
 configure_wsl_conf() {
   log_info "Writing /etc/wsl.conf (systemd, interop, automount metadata)..."
+
+  # Preserve the default user set at first boot (or fall back to the
+  # invoking user) so a WSL restart never drops back to root.
+  local default_user=""
   if [ -f /etc/wsl.conf ]; then
+    default_user="$(awk -F= '
+      /^\[/ { section = tolower($0) }
+      section == "[user]" && tolower($1) ~ /^[ \t]*default[ \t]*$/ { gsub(/[ \t\r]/, "", $2); print $2; exit }
+    ' /etc/wsl.conf)"
     sudo cp /etc/wsl.conf "/etc/wsl.conf.backup.$(date +%Y%m%d_%H%M%S)"
   fi
+  if [ -z "$default_user" ] && [ "$(id -u)" -ne 0 ]; then
+    default_user="$USER"
+  fi
+
   sudo tee /etc/wsl.conf > /dev/null << 'EOF'
 # Managed by Robertcl795/dotfiles (install/wsl.sh)
 # Apply with: wsl --shutdown (from PowerShell), then reopen the terminal.
@@ -91,6 +103,11 @@ root=/mnt/
 # metadata enables Linux permissions on NTFS mounts
 options="metadata,umask=22,fmask=11"
 EOF
+
+  if [ -n "$default_user" ]; then
+    printf '\n[user]\ndefault=%s\n' "$default_user" | sudo tee -a /etc/wsl.conf > /dev/null
+    log_info "Default WSL user preserved: $default_user"
+  fi
 }
 
 configure_wslconfig() {
