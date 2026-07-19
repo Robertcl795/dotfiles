@@ -45,7 +45,6 @@ bash "$DOTFILES_DIR/install/shell/zsh.sh" --run
 
 bash "$DOTFILES_DIR/install/prompt/starship.sh" --run
 bash "$DOTFILES_DIR/install/nvim.sh" --run
-bash "$DOTFILES_DIR/install/dev/mise.sh" --run
 bash "$DOTFILES_DIR/install/dev/k8s.sh" --run
 bash "$DOTFILES_DIR/install/zellij.sh" --run
 bash "$DOTFILES_DIR/install/dev/lang.sh" --run
