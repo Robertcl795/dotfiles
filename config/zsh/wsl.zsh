@@ -8,6 +8,17 @@ fi
 alias explorer='explorer.exe .'
 alias winhome='cd "$(wslpath -u "$(cd /mnt/c && /mnt/c/Windows/System32/cmd.exe /c "echo %USERPROFILE%" 2>/dev/null | tr -d "\r")")"'
 
+# ---------- Start in $HOME, not the Windows working directory ----------
+# WSL launches shells in the Windows CWD (e.g. /mnt/c/Users/<you>), which
+# is slow NTFS. Move home unless the user opted out (DOT_NO_AUTOCD=1).
+if [[ -o interactive && -z "${DOT_NO_AUTOCD:-}" ]]; then
+  case "$PWD" in
+    /mnt/c/[Uu]sers/*|/mnt/c/[Ww]indows*|/mnt/c/WINDOWS*)
+      cd "$HOME"
+      ;;
+  esac
+fi
+
 # ---------- Filesystem performance guard ----------
 # Working under /mnt/* (NTFS via 9P) is 10-20x slower than native ext4.
 # Warn on shell start and whenever cd lands on a Windows mount.

@@ -48,6 +48,9 @@ fi
 
 alias -- -='cd -'  # -- prevents - being parsed as a flag; cd - jumps to previous directory
 
+# Upstream uses lf; we use yazi. Keep the muscle memory working.
+alias lf='y'
+
 # yazi with directory-follow: quitting yazi leaves you in the last visited dir
 y() {
   local tmp cwd

@@ -3,19 +3,44 @@
 Full bootstrapper for WSL Arch and WSL Ubuntu with testable checkpoints.
 
 ## Quick Install
+
+From `main`:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Robertcl795/dotfiles/main/bootstrap.sh | bash
 ```
 
-Or:
+From a feature branch (replace with the branch you are testing — currently
+`claude/dotfiles-rust-web-refactor-8kcsxv`):
+```bash
+BRANCH=claude/dotfiles-rust-web-refactor-8kcsxv
+curl -fsSL "https://raw.githubusercontent.com/Robertcl795/dotfiles/$BRANCH/bootstrap.sh" | DOTFILES_BRANCH=$BRANCH bash
+```
+
+Or clone manually:
 ```bash
 git clone https://github.com/Robertcl795/dotfiles.git ~/.dotfiles
 ~/.dotfiles/bootstrap.sh
 ```
 
+### Fresh Arch WSL (first boot)
+
+A brand-new `wsl -d archlinux` instance starts as **root** with no user.
+Run the same bootstrap command as root: it will update the system
+(`pacman -Syu`), enable sudo for the `wheel` group, prompt for a username
+(`useradd -m -G wheel`), and set it as the WSL default user. Then:
+
+```powershell
+wsl --shutdown
+wsl -d archlinux   # now logs in as your user
+```
+
+…and run the bootstrap again as that user to install everything else.
+For non-interactive first boot, pass `DOT_USERNAME=<name>`.
+
 > **WSL tip:** keep the repo (and your projects) under `~/`, never under
-> `/mnt/c/...` — cross-OS I/O is 10-20x slower. The bootstrap and the shell
-> will warn you if you don't.
+> `/mnt/c/...` — cross-OS I/O is 10-20x slower. The bootstrap moves out of
+> `/mnt` automatically and the shell warns (and auto-`cd`s home) when a new
+> session starts on the Windows filesystem. Opt out with `DOT_NO_AUTOCD=1`.
 
 ## Features
 
@@ -29,7 +54,7 @@ git clone https://github.com/Robertcl795/dotfiles.git ~/.dotfiles
 - **Zellij** as terminal multiplexer (replaces tmux)
 - Neovim + lazy.nvim
 - Language toolchains: **rustup** (Rust), **fnm** (Node.js), **uv** (Python),
-  plus mise + kubectl + helm + k3d
+  plus kubectl + helm + k3d
 - AI tooling: **Claude Code**, **opencode**, **gh copilot**
 - WSL2 optimizations: `.wslconfig` on the Windows host with
   `networkingMode=mirrored`, `dnsTunneling=true`, `autoProxy=true`
@@ -46,6 +71,9 @@ DOT_ENABLE_K8S=0|1
 DOT_ENABLE_WSLCONFIG=0|1           # write .wslconfig on the Windows host
 DOT_NONINTERACTIVE=1
 DOT_VERBOSE=1
+DOT_USERNAME=<name>                # Arch first boot: user to create (non-interactive)
+DOT_NO_AUTOCD=1                    # don't auto-cd to ~ when a shell starts on /mnt/*
+DOTFILES_BRANCH=<branch>           # bootstrap from a branch other than main
 ```
 
 Example non-interactive:

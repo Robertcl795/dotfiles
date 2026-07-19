@@ -43,20 +43,37 @@ install_zsh() {
   # State/cache dirs used by history and completion
   mkdir -p "${XDG_STATE_HOME:-$HOME/.local/state}/zsh" "${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
 
-  if [ "$DOT_SHELL" = "zsh" ] && ensure_cmd chsh; then
-    local zsh_path current_shell
-    zsh_path="$(command -v zsh)"
-    current_shell="$(getent passwd "$USER" | cut -d: -f7 || true)"
-    if [ "$current_shell" = "$zsh_path" ]; then
-      log_info "zsh is already the default shell."
-    elif [ "$DOT_NONINTERACTIVE" = "1" ]; then
-      log_info "Setting zsh as default shell (non-interactive)."
-      sudo chsh -s "$zsh_path" "$USER" || chsh -s "$zsh_path" || log_warn "Unable to change default shell."
-    else
-      if confirm "Set zsh as default shell?" "y"; then
-        chsh -s "$zsh_path" || log_warn "Unable to change default shell."
-      fi
-    fi
+  if [ "$DOT_SHELL" = "zsh" ]; then
+    set_default_shell_zsh
+  fi
+}
+
+set_default_shell_zsh() {
+  local zsh_path current_shell
+  zsh_path="$(command -v zsh)"
+  current_shell="$(getent passwd "$USER" | cut -d: -f7 || true)"
+
+  if [ "$current_shell" = "$zsh_path" ]; then
+    log_info "zsh is already the default shell."
+    return 0
+  fi
+
+  if [ "$DOT_NONINTERACTIVE" != "1" ] && ! confirm "Set zsh as default shell?" "y"; then
+    return 0
+  fi
+
+  # chsh refuses shells missing from /etc/shells
+  if ! grep -qx "$zsh_path" /etc/shells 2>/dev/null; then
+    echo "$zsh_path" | sudo tee -a /etc/shells > /dev/null
+  fi
+
+  # usermod via sudo avoids chsh's password prompt (which silently fails
+  # in scripted runs); fall back to chsh for systems without usermod.
+  log_info "Setting zsh as default shell for $USER..."
+  if sudo usermod -s "$zsh_path" "$USER" 2>/dev/null || chsh -s "$zsh_path"; then
+    log_info "Default shell changed to zsh (takes effect on next login)."
+  else
+    log_warn "Unable to change default shell. Run manually: chsh -s $zsh_path"
   fi
 }
 
