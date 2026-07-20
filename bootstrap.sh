@@ -7,6 +7,7 @@ set -euo pipefail
 #   OR cloned: ./bootstrap.sh
 
 DOTFILES_REPO="https://github.com/Robertcl795/dotfiles.git"
+DOTFILES_BRANCH="${DOTFILES_BRANCH:-main}"
 SOURCE_PATH="${BASH_SOURCE[0]:-${0:-}}"
 if [ -z "$SOURCE_PATH" ]; then
   SOURCE_PATH="$PWD"
@@ -45,16 +46,84 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-# Prevent root
+is_wsl() { grep -qi microsoft /proc/version 2>/dev/null; }
+is_arch() { grep -qi '^ID=arch' /etc/os-release 2>/dev/null; }
+
+# ---------------------------------------------------------------------------
+# Arch WSL first boot: a fresh archlinux WSL instance starts as root with no
+# regular user. Provision the system, create a sudo-enabled user and set it
+# as the WSL default, then ask for a restart before the real bootstrap runs.
+# ---------------------------------------------------------------------------
+arch_first_boot() {
+  print_info "Fresh Arch WSL detected (running as root). Starting first-boot provisioning..."
+
+  # Move out of the Windows filesystem (9P mounts are 10-20x slower)
+  case "$PWD" in
+    /mnt/*) print_info "Leaving Windows filesystem (cd /root)..."; cd /root ;;
+  esac
+
+  print_info "Updating system (pacman -Syu)..."
+  pacman -Syu --noconfirm
+  pacman -S --noconfirm --needed sudo
+
+  print_info "Granting sudo to the wheel group..."
+  echo "%wheel ALL=(ALL) ALL" > /etc/sudoers.d/wheel
+  chmod 440 /etc/sudoers.d/wheel
+
+  local username="${DOT_USERNAME:-}"
+  if [ -z "$username" ] && [ -e /dev/tty ]; then
+    read -r -p "Username for your new (sudo-enabled) user: " username </dev/tty
+  fi
+  if [ -z "$username" ]; then
+    print_error "No username provided. Re-run with DOT_USERNAME=<name> for non-interactive setups."
+    exit 1
+  fi
+
+  if id "$username" >/dev/null 2>&1; then
+    print_info "User $username already exists; ensuring wheel membership."
+    usermod -aG wheel "$username"
+  else
+    useradd -m -G wheel -s /bin/bash "$username"
+    print_info "Set a password for $username (needed for sudo):"
+    passwd "$username" </dev/tty || print_warning "Password not set; run 'passwd $username' manually."
+  fi
+
+  # Boot into this user (and systemd) by default from now on
+  if [ -f /etc/wsl.conf ]; then
+    cp /etc/wsl.conf "/etc/wsl.conf.backup.$(date +%Y%m%d_%H%M%S)"
+  fi
+  cat > /etc/wsl.conf << EOF
+[boot]
+systemd=true
+
+[user]
+default=$username
+EOF
+
+  print_success "First-boot provisioning complete."
+  print_info "Now restart WSL from PowerShell:   wsl --shutdown"
+  print_info "Reopen Arch (it will log in as $username) and run this bootstrap again."
+  exit 0
+}
+
 if [ "$(id -u)" -eq 0 ]; then
+  if is_arch && is_wsl; then
+    arch_first_boot
+  fi
   print_error "Do not run this script as root. Clone and run as your regular user."
   exit 1
 fi
 
 print_info "Starting dotfiles bootstrap..."
 
-# WSL: warn early when installing onto the slow NTFS side
-if grep -qi microsoft /proc/version 2>/dev/null; then
+# WSL: get off the Windows filesystem before doing anything else
+if is_wsl; then
+  case "$PWD" in
+    /mnt/*)
+      print_info "Running from a Windows NTFS mount ($PWD); moving to \$HOME."
+      cd "$HOME"
+      ;;
+  esac
   case "$DOTFILES_DIR" in
     /mnt/*)
       print_warning "DOTFILES_DIR ($DOTFILES_DIR) is on a Windows NTFS mount."
@@ -83,8 +152,8 @@ if [ -d "$DOTFILES_DIR/.git" ]; then
 elif [ -d "$DOTFILES_DIR" ] && [ "$(ls -A "$DOTFILES_DIR" 2>/dev/null | wc -l)" -gt 0 ]; then
   print_warning "$DOTFILES_DIR exists and is not empty; using it without cloning."
 else
-  print_info "Cloning dotfiles into $DOTFILES_DIR..."
-  git clone --depth=1 "$DOTFILES_REPO" "$DOTFILES_DIR"
+  print_info "Cloning dotfiles into $DOTFILES_DIR (branch: $DOTFILES_BRANCH)..."
+  git clone --depth=1 --branch "$DOTFILES_BRANCH" "$DOTFILES_REPO" "$DOTFILES_DIR"
 fi
 
 # Export DOTFILES_DIR for child scripts and run installer forwarding args

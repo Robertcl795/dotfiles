@@ -6,12 +6,6 @@ if [ "${DOT_ENABLE_K8S:-1}" = "0" ]; then
   exit 0
 fi
 
-if ! command -v mise >/dev/null 2>&1; then
-  echo "mise not installed." >&2
-  exit 1
-fi
-mise doctor
-
 if ! command -v kubectl >/dev/null 2>&1; then
   echo "kubectl not installed." >&2
   exit 1

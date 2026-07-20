@@ -11,5 +11,5 @@ check_link() {
 check_link "$HOME/.config/nvim"
 check_link "$HOME/.config/fish/config.fish"
 check_link "$HOME/.zshrc"
-check_link "$HOME/.config/mise/config.toml"
 check_link "$HOME/.config/starship.toml"
+check_link "$HOME/.config/zellij/config.kdl"

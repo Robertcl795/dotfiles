@@ -47,10 +47,6 @@ unset _rl_module
 # Version managers & dev environment
 # =========================================================
 
-if command -v mise >/dev/null 2>&1; then
-  eval "$(mise activate zsh)"
-fi
-
 if [ -f "$DOTFILES_DIR/config/zsh/dev.zsh" ]; then
   source "$DOTFILES_DIR/config/zsh/dev.zsh"
 fi

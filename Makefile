@@ -53,3 +53,11 @@ sync-radleylewis:
 	@echo "🔄 Syncing vendored radleylewis config from upstream..."
 	@bash install/shell/radleylewis.sh --run
 
+ai-deploy:
+	@echo "🤖 Deploying AI development standard..."
+	@bash install/ai.sh --run
+
+ai-scaffold:
+	@test -n "$(TARGET)" || (echo "Usage: make ai-scaffold TARGET=/path/to/repo" && exit 1)
+	@bash ai/scaffold.sh "$(TARGET)"
+

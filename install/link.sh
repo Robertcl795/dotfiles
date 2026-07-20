@@ -19,7 +19,6 @@ link_dotfiles() {
   symlink_with_backup "$DOTFILES_DIR/shells/zsh" "$HOME/.config/zsh"
 
   symlink_with_backup "$DOTFILES_DIR/nvim" "$HOME/.config/nvim"
-  symlink_with_backup "$DOTFILES_DIR/config/mise/config.toml" "$HOME/.config/mise/config.toml"
 
   log_info "Symlinks created."
 }
