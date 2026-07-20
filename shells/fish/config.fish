@@ -33,6 +33,11 @@ if type -q fnm
   fnm env --use-on-cd --shell fish | source
 end
 
+set -gx PNPM_HOME "$HOME/.local/share/pnpm"
+if test -d "$PNPM_HOME"
+  fish_add_path "$PNPM_HOME"
+end
+
 if type -q fzf
   set -gx FZF_DEFAULT_COMMAND 'rg --files --hidden --glob "!.git/*"'
 end
