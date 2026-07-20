@@ -56,6 +56,11 @@ For non-interactive first boot, pass `DOT_USERNAME=<name>`.
 - Language toolchains: **rustup** (Rust), **fnm** (Node.js), **uv** (Python),
   plus kubectl + helm + k3d
 - AI tooling: **Claude Code**, **opencode**, **gh copilot**
+- **AI Development Standard** (`ai/`): canonical instruction sets, specialized
+  Claude agents, reusable prompts, skills and a local vector context DB
+  (ChromaDB + fastembed via MCP) — deployed globally by the bootstrap and
+  into any repo with `make ai-scaffold TARGET=/path/to/repo` (see
+  [`ai/README.md`](ai/README.md))
 - WSL2 optimizations: `.wslconfig` on the Windows host with
   `networkingMode=mirrored`, `dnsTunneling=true`, `autoProxy=true`
   (configured automatically via interop), systemd-enabled `/etc/wsl.conf`,

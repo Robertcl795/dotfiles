@@ -1,0 +1,28 @@
+# AI development standard — task runner
+# Run from anywhere: just --justfile ~/.dotfiles/ai/justfile <target>
+
+ai_dir := justfile_directory()
+
+# List available targets
+default:
+    @just --justfile {{ai_dir}}/justfile --list
+
+# (Re)index a repository into the vector context DB
+index repo=".":
+    uv run --directory {{ai_dir}}/context indexer.py index --repo {{repo}}
+
+# Semantic search across indexed repos
+search query collection="":
+    uv run --directory {{ai_dir}}/context indexer.py search "{{query}}" --collection "{{collection}}"
+
+# List indexed collections
+collections:
+    uv run --directory {{ai_dir}}/context indexer.py collections
+
+# Deploy agents/prompts/skills globally (~/.claude) and sync the context env
+deploy:
+    bash {{ai_dir}}/../install/ai.sh --run
+
+# Scaffold the standard into a target repo (.github/instructions + .claude + .mcp.json)
+scaffold target force="":
+    bash {{ai_dir}}/scaffold.sh {{target}} {{force}}

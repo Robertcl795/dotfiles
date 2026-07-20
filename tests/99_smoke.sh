@@ -16,7 +16,8 @@ for t in \
   "$SCRIPT_DIR/05_nvim.sh" \
   "$SCRIPT_DIR/06_dev.sh" \
   "$SCRIPT_DIR/07_devstack.sh" \
-  "$SCRIPT_DIR/08_wsl.sh"
+  "$SCRIPT_DIR/08_wsl.sh" \
+  "$SCRIPT_DIR/09_ai.sh"
 do
   bash "$t"
 done
