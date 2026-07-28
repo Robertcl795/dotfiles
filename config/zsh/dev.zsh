@@ -14,6 +14,15 @@ if command -v fnm >/dev/null 2>&1; then
   eval "$(fnm env --use-on-cd --shell zsh)"
 fi
 
+# ---------- pnpm (standalone, no corepack) ----------
+export PNPM_HOME="${PNPM_HOME:-$HOME/.local/share/pnpm}"
+if [ -d "$PNPM_HOME" ]; then
+  case ":$PATH:" in
+    *":$PNPM_HOME:"*) ;;
+    *) export PATH="$PNPM_HOME:$PATH" ;;
+  esac
+fi
+
 # ---------- Python (uv) ----------
 # uv installs into ~/.local/bin (already on PATH). Enable completions.
 if command -v uv >/dev/null 2>&1; then

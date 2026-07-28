@@ -42,6 +42,7 @@ while [ $# -gt 0 ]; do
       shift ;;
     --enable-wslconfig) export DOT_ENABLE_WSLCONFIG=1; shift ;;
     --disable-wslconfig) export DOT_ENABLE_WSLCONFIG=0; shift ;;
+    --wsl-networking) export DOT_WSL_NETWORKING="$2"; shift 2 ;;
     *) INSTALL_ARGS+=("$1"); shift ;;
   esac
 done
@@ -53,7 +54,48 @@ is_arch() { grep -qi '^ID=arch' /etc/os-release 2>/dev/null; }
 # Arch WSL first boot: a fresh archlinux WSL instance starts as root with no
 # regular user. Provision the system, create a sudo-enabled user and set it
 # as the WSL default, then ask for a restart before the real bootstrap runs.
+# A one-shot hook in the new user's ~/.bashrc resumes the bootstrap
+# automatically on the first login after 'wsl --shutdown'.
 # ---------------------------------------------------------------------------
+
+# Ask for a password twice (hidden input) and set it via chpasswd.
+# DOT_PASSWORD skips the prompt for non-interactive setups.
+set_user_password() {
+  local username="$1" pass="" confirm=""
+  if [ -n "${DOT_PASSWORD:-}" ]; then
+    if printf '%s:%s\n' "$username" "$DOT_PASSWORD" | chpasswd; then
+      print_success "Password set for $username (from DOT_PASSWORD)."
+    else
+      print_warning "Password not set; run 'passwd $username' manually."
+    fi
+    return 0
+  fi
+  if [ ! -e /dev/tty ]; then
+    print_warning "No terminal available; set a password later with 'passwd $username'."
+    return 0
+  fi
+  print_info "Set a password for $username (needed for sudo):"
+  while :; do
+    read -r -s -p "  Password: " pass </dev/tty; echo >&2
+    if [ -z "$pass" ]; then
+      print_warning "Password cannot be empty; try again."
+      continue
+    fi
+    read -r -s -p "  Confirm password: " confirm </dev/tty; echo >&2
+    if [ "$pass" != "$confirm" ]; then
+      print_warning "Passwords do not match; try again."
+      continue
+    fi
+    break
+  done
+  if printf '%s:%s\n' "$username" "$pass" | chpasswd; then
+    print_success "Password set for $username."
+  else
+    print_warning "Password not set; run 'passwd $username' manually."
+  fi
+  pass=""; confirm=""
+}
+
 arch_first_boot() {
   print_info "Fresh Arch WSL detected (running as root). Starting first-boot provisioning..."
 
@@ -64,7 +106,7 @@ arch_first_boot() {
 
   print_info "Updating system (pacman -Syu)..."
   pacman -Syu --noconfirm
-  pacman -S --noconfirm --needed sudo
+  pacman -S --noconfirm --needed sudo git
 
   print_info "Granting sudo to the wheel group..."
   echo "%wheel ALL=(ALL) ALL" > /etc/sudoers.d/wheel
@@ -84,8 +126,7 @@ arch_first_boot() {
     usermod -aG wheel "$username"
   else
     useradd -m -G wheel -s /bin/bash "$username"
-    print_info "Set a password for $username (needed for sudo):"
-    passwd "$username" </dev/tty || print_warning "Password not set; run 'passwd $username' manually."
+    set_user_password "$username"
   fi
 
   # Boot into this user (and systemd) by default from now on
@@ -100,9 +141,89 @@ systemd=true
 default=$username
 EOF
 
+  # -------------------------------------------------------------------------
+  # Stage the repo and a one-shot resume hook so the bootstrap continues
+  # automatically the first time $username logs in after the restart.
+  # -------------------------------------------------------------------------
+  local user_home staged
+  user_home="$(getent passwd "$username" | cut -d: -f6)"
+  user_home="${user_home:-/home/$username}"
+  staged="$user_home/.dotfiles"
+
+  if [ ! -d "$staged" ]; then
+    if [ -d "$SCRIPT_DIR/.git" ] || [ -d "$SCRIPT_DIR/install" ]; then
+      print_info "Staging dotfiles repo at $staged..."
+      cp -a "$SCRIPT_DIR" "$staged"
+    else
+      print_info "Cloning dotfiles into $staged (branch: $DOTFILES_BRANCH)..."
+      git clone --depth=1 --branch "$DOTFILES_BRANCH" "$DOTFILES_REPO" "$staged" \
+        || print_warning "Clone failed; the resume hook will fetch the bootstrap itself."
+    fi
+  fi
+
+  local var val
+  {
+    printf 'export DOTFILES_DIR=%q\n' "$staged"
+    printf 'export DOTFILES_BRANCH=%q\n' "$DOTFILES_BRANCH"
+    for var in DOT_SHELL DOT_THEME DOT_ENABLE_K8S DOT_ENABLE_WSLCONFIG DOT_WSL_NETWORKING DOT_NONINTERACTIVE DOT_VERBOSE; do
+      val="$(printenv "$var" 2>/dev/null || true)"
+      if [ -n "$val" ]; then
+        printf 'export %s=%q\n' "$var" "$val"
+      fi
+    done
+  } > "$user_home/.dotfiles-resume.env"
+
+  touch "$user_home/.bashrc"
+  if ! grep -q "dotfiles-bootstrap-resume" "$user_home/.bashrc"; then
+    cat >> "$user_home/.bashrc" << 'RESUME_HOOK'
+
+# >>> dotfiles-bootstrap-resume >>>
+# One-shot hook written by bootstrap.sh first-boot provisioning.
+# It removes itself after running once.
+if [ -f "$HOME/.dotfiles-resume.env" ] && [ -t 0 ]; then
+  . "$HOME/.dotfiles-resume.env"
+  rm -f "$HOME/.dotfiles-resume.env"
+  sed -i '/^# >>> dotfiles-bootstrap-resume >>>$/,/^# <<< dotfiles-bootstrap-resume <<<$/d' "$HOME/.bashrc"
+  echo "Resuming dotfiles bootstrap..."
+  if [ -f "${DOTFILES_DIR:-$HOME/.dotfiles}/bootstrap.sh" ]; then
+    bash "${DOTFILES_DIR:-$HOME/.dotfiles}/bootstrap.sh"
+  else
+    curl -fsSL "https://raw.githubusercontent.com/Robertcl795/dotfiles/${DOTFILES_BRANCH:-main}/bootstrap.sh" | bash
+  fi
+fi
+# <<< dotfiles-bootstrap-resume <<<
+RESUME_HOOK
+  fi
+  chown -R "$username:" "$staged" 2>/dev/null || true
+  chown "$username:" "$user_home/.bashrc" "$user_home/.dotfiles-resume.env"
+
   print_success "First-boot provisioning complete."
-  print_info "Now restart WSL from PowerShell:   wsl --shutdown"
-  print_info "Reopen Arch (it will log in as $username) and run this bootstrap again."
+  print_info "WSL must now restart. When you reopen Arch it will log in as $username"
+  print_info "and the bootstrap will continue automatically."
+
+  local wsl_exe=""
+  if command -v wsl.exe >/dev/null 2>&1; then
+    wsl_exe="wsl.exe"
+  elif [ -x /mnt/c/Windows/System32/wsl.exe ]; then
+    wsl_exe="/mnt/c/Windows/System32/wsl.exe"
+  fi
+
+  if [ -n "$wsl_exe" ] && [ -e /dev/tty ] && [ "${DOT_NONINTERACTIVE:-0}" != "1" ]; then
+    local reply=""
+    read -r -p "Shut down WSL now? (Y/n) " reply </dev/tty
+    case "$reply" in
+      [Nn]*)
+        print_info "Skipped. Run 'wsl --shutdown' from PowerShell when ready, then reopen Arch."
+        ;;
+      *)
+        print_info "Shutting down WSL (this window will close)..."
+        exec "$wsl_exe" --shutdown
+        ;;
+    esac
+  else
+    print_info "Now restart WSL from PowerShell:   wsl --shutdown"
+    print_info "Then reopen Arch to continue the installation."
+  fi
   exit 0
 }
 
