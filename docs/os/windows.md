@@ -6,6 +6,26 @@ does not require a WSL distro to be installed at all. If you want WSL
 Arch/Ubuntu instead (or in addition), see
 [ubuntu.md](ubuntu.md)/[arch.md](arch.md) and use `bootstrap.sh` there.
 
+## Prerequisite: run this from pwsh, not Windows PowerShell 5.1
+
+`bootstrap.ps1` itself only requires PowerShell 5.1 (`#Requires -Version
+5.1`) to kick off — cloning the repo and running `windows/packages.ps1`
+work fine there. But **`packages.ps1` never installs `pwsh` itself** (no
+`pwsh` entry in its scoop app list), and `windows/profile.ps1` writes its
+managed block to `$PROFILE.CurrentUserAllHosts`, which resolves relative to
+whichever host is *currently running the script*. Launch the one-liner from
+Windows PowerShell 5.1 (Windows' shipped default) and the prompt/alias
+block lands in 5.1's own profile path — a file pwsh never reads — so the
+new prompt, theme and aliases silently never show up.
+
+Install pwsh yourself first, then run the bootstrap from inside it:
+
+```powershell
+winget install Microsoft.PowerShell   # or: scoop install pwsh
+pwsh                                   # switch into pwsh
+irm https://raw.githubusercontent.com/Robertcl795/dotfiles/main/bootstrap.ps1 | iex
+```
+
 ## One-line install
 
 ```powershell
@@ -56,7 +76,10 @@ shell setup, the vendored radleylewis zsh config, `install/link.sh`'s
 symlink-based dotfile linking, and phase 11's AI Development Standard
 deployment (`ai/` → `~/.claude/*`, context DB). `k3d` additionally
 requires Docker Desktop with the WSL2 backend, since it runs containers
-either way.
+either way. **`pwsh` (PowerShell 7) itself is also not installed** — see
+the prerequisite callout above; every other tool in this list installs
+fine from Windows PowerShell 5.1, but the profile/theme/alias block only
+works once you're actually running pwsh.
 
 ## Prompt theme — same files, different mechanism
 

@@ -50,14 +50,19 @@ For non-interactive first boot, pass `DOT_USERNAME=<name>` (and optionally
 Sets up PowerShell itself — prompt theme, modern CLI stack (via
 [scoop](https://scoop.sh)), and a matching Windows Terminal color scheme.
 Completely separate from the WSL path above and doesn't require a WSL
-distro at all:
+distro at all. **Run it from pwsh (PowerShell 7), not Windows PowerShell
+5.1** — the bootstrap doesn't install pwsh itself, and the profile/theme
+block only lands correctly in the profile of whichever host runs it:
 
 ```powershell
+winget install Microsoft.PowerShell   # if you don't already have pwsh
+pwsh
 irm https://raw.githubusercontent.com/Robertcl795/dotfiles/main/bootstrap.ps1 | iex
 ```
 
 Full details, including why the network setup here is unrelated to
-`.wslconfig`: [docs/os/windows.md](docs/os/windows.md).
+`.wslconfig`, and why running this from pwsh matters:
+[docs/os/windows.md](docs/os/windows.md).
 
 ## Features
 

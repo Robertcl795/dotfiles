@@ -3,9 +3,14 @@
 # equivalent to zsh's autosuggestions/highlighting), fzf/zoxide integration,
 # and modern-CLI aliases matching shells/zsh/aliases.zsh.
 #
-# Targets pwsh's $PROFILE.CurrentUserAllHosts. Windows PowerShell 5.1 is not
-# configured; install pwsh (`scoop install pwsh` runs earlier in packages.ps1
-# only if requested) and use it as the default host in Windows Terminal.
+# Targets pwsh's $PROFILE.CurrentUserAllHosts. pwsh is NOT installed by
+# packages.ps1 (no `pwsh` scoop app in its core list) and $PROFILE resolves
+# relative to whichever host is currently running this script - so this must
+# be run from inside pwsh for the block to land in pwsh's profile path.
+# Running the bootstrap from Windows PowerShell 5.1 instead writes the block
+# to 5.1's own profile.ps1, which pwsh never reads. Install pwsh yourself
+# first (`winget install Microsoft.PowerShell` or `scoop install pwsh`) and
+# set it as the default host in Windows Terminal.
 
 $script:ManagedBeginMarker = '# >>> dotfiles managed block (do not edit by hand) >>>'
 $script:ManagedEndMarker   = '# <<< dotfiles managed block <<<'
