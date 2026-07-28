@@ -1,0 +1,23 @@
+{
+  "name": "dotfiles-eva01",
+  "background": "#12081A",
+  "foreground": "#C9A6FF",
+  "cursorColor": "#C9A6FF",
+  "selectionBackground": "#3A1F55",
+  "black": "#0A0410",
+  "red": "#FF4D6D",
+  "green": "#7CFF9E",
+  "yellow": "#FFD86B",
+  "blue": "#7A6BFF",
+  "purple": "#C9A6FF",
+  "cyan": "#8CF7E2",
+  "white": "#E9DAFF",
+  "brightBlack": "#2E1A40",
+  "brightRed": "#FF7A93",
+  "brightGreen": "#A0FFBB",
+  "brightYellow": "#FFE699",
+  "brightBlue": "#A79BFF",
+  "brightPurple": "#E0C6FF",
+  "brightCyan": "#B4FCEC",
+  "brightWhite": "#FFFFFF"
+}

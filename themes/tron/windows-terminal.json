@@ -1,0 +1,23 @@
+{
+  "name": "dotfiles-tron",
+  "background": "#000B14",
+  "foreground": "#7DF9FF",
+  "cursorColor": "#7DF9FF",
+  "selectionBackground": "#0F3A4A",
+  "black": "#001018",
+  "red": "#FF3B3B",
+  "green": "#29FFC6",
+  "yellow": "#FFD166",
+  "blue": "#4DD8FF",
+  "purple": "#7A5CFF",
+  "cyan": "#7DF9FF",
+  "white": "#D6F6FF",
+  "brightBlack": "#0B2A38",
+  "brightRed": "#FF6B6B",
+  "brightGreen": "#6BFFDC",
+  "brightYellow": "#FFE199",
+  "brightBlue": "#8CE9FF",
+  "brightPurple": "#A390FF",
+  "brightCyan": "#B8FCFF",
+  "brightWhite": "#FFFFFF"
+}

@@ -1,0 +1,23 @@
+{
+  "name": "dotfiles-cyber",
+  "background": "#0D1117",
+  "foreground": "#33FF66",
+  "cursorColor": "#33FF66",
+  "selectionBackground": "#1A3B1A",
+  "black": "#0C0C0C",
+  "red": "#FF5555",
+  "green": "#33FF66",
+  "yellow": "#F1FA8C",
+  "blue": "#3B78FF",
+  "purple": "#BD93F9",
+  "cyan": "#66FFCC",
+  "white": "#E6E6E6",
+  "brightBlack": "#4D4D4D",
+  "brightRed": "#FF6E6E",
+  "brightGreen": "#69FF94",
+  "brightYellow": "#FFFFA5",
+  "brightBlue": "#6E9FFF",
+  "brightPurple": "#D6ACFF",
+  "brightCyan": "#A4FFFF",
+  "brightWhite": "#FFFFFF"
+}

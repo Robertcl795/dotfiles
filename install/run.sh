@@ -57,4 +57,5 @@ if [ -d "$DOTFILES_DIR/tests" ]; then
 fi
 
 log_step "Bootstrap complete."
+bash "$DOTFILES_DIR/install/summary.sh" --run
 log_info "Run tests with: tests/99_smoke.sh"

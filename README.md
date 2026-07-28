@@ -42,6 +42,20 @@ For non-interactive first boot, pass `DOT_USERNAME=<name>`.
 > `/mnt` automatically and the shell warns (and auto-`cd`s home) when a new
 > session starts on the Windows filesystem. Opt out with `DOT_NO_AUTOCD=1`.
 
+### Native Windows (PowerShell, no WSL)
+
+Sets up PowerShell itself — prompt theme, modern CLI stack (via
+[scoop](https://scoop.sh)), and a matching Windows Terminal color scheme.
+Completely separate from the WSL path above and doesn't require a WSL
+distro at all:
+
+```powershell
+irm https://raw.githubusercontent.com/Robertcl795/dotfiles/main/bootstrap.ps1 | iex
+```
+
+Full details, including why the network setup here is unrelated to
+`.wslconfig`: [docs/os/windows.md](docs/os/windows.md).
+
 ## Features
 
 - One-command bootstrap (WSL Arch + WSL Ubuntu)
@@ -89,6 +103,10 @@ DOT_NONINTERACTIVE=1 DOT_SHELL=zsh DOT_THEME=radley ./bootstrap.sh
 After changing WSL networking settings, run `wsl --shutdown` from PowerShell
 and reopen your terminal.
 
+`bootstrap.ps1` (native Windows) takes the equivalent options as
+parameters instead of env vars: `-NonInteractive -Theme <name> -EnableK8s
+0|1 -Branch <branch>`.
+
 ## Upstream sync (radleylewis)
 
 The zsh base config is vendored under `config/zsh/radleylewis/`. To re-fetch
@@ -98,12 +116,20 @@ upstream and refresh/diff the vendored files:
 make sync-radleylewis
 ```
 
+## Documentation
+
+Per-phase and per-OS docs (what each phase does, files touched,
+customization, troubleshooting): [docs/README.md](docs/README.md).
+
 ## Tests
 
 Run all checkpoints:
 ```bash
 tests/99_smoke.sh
 ```
+
+A successful bootstrap ends with an installed-tools summary (versions
+where available) — see [docs/sections/12-summary.md](docs/sections/12-summary.md).
 
 ## Usage
 

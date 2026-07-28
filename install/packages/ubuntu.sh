@@ -16,16 +16,22 @@ install_packages_ubuntu() {
     ripgrep fd-find bat \
     fzf zoxide neovim fish zsh
 
-  if apt-cache show eza >/dev/null 2>&1; then
-    sudo apt-get install -y eza
-  else
-    sudo apt-get install -y exa
+  if ! sudo apt-get install -y eza; then
+    log_warn "eza has no installable candidate; trying exa instead."
+    sudo apt-get install -y exa || log_warn "Neither eza nor exa is installable via apt; skipping."
   fi
 
-  if apt-cache show tldr >/dev/null 2>&1; then
-    sudo apt-get install -y tldr
-  else
-    sudo apt-get install -y tealdeer || true
+  # `apt-cache show tldr` can return 0 (cached metadata) even when apt has no
+  # installable candidate for the current release/arch, which made the old
+  # candidate-check give a false positive and take down the whole bootstrap
+  # under `set -e` when `apt-get install` then failed. Just attempt the
+  # install directly (inside an `if`, so failure never trips errexit) and
+  # fall back to tealdeer; skip entirely if neither is installable.
+  if ! sudo apt-get install -y tldr; then
+    log_warn "tldr has no installable candidate; trying tealdeer instead."
+    if ! sudo apt-get install -y tealdeer; then
+      log_warn "Neither tldr nor tealdeer is installable via apt; skipping (cheat-sheet lookups won't be available)."
+    fi
   fi
 
   if ! ensure_cmd starship; then

@@ -1,0 +1,23 @@
+{
+  "name": "dotfiles-radley",
+  "background": "#11121A",
+  "foreground": "#D8DEE9",
+  "cursorColor": "#61AFEF",
+  "selectionBackground": "#29314A",
+  "black": "#101116",
+  "red": "#FF6B6B",
+  "green": "#8FE388",
+  "yellow": "#F3D67A",
+  "blue": "#61AFEF",
+  "purple": "#B389F0",
+  "cyan": "#56D6D0",
+  "white": "#DCE1EC",
+  "brightBlack": "#3A3D4A",
+  "brightRed": "#FF8F8F",
+  "brightGreen": "#A9F0A2",
+  "brightYellow": "#FFE8A0",
+  "brightBlue": "#86C4FF",
+  "brightPurple": "#CBAAFF",
+  "brightCyan": "#7FF0E9",
+  "brightWhite": "#FFFFFF"
+}
