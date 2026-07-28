@@ -111,29 +111,43 @@ EOF
 }
 
 configure_wslconfig() {
+  # NAT + localhostForwarding is the default: it is what makes servers
+  # started inside WSL reachable from Windows at localhost:<port>.
+  # mirrored mode is known to break localhost connectivity (timeouts) on
+  # many Windows builds / VPN setups, so it is opt-in via
+  # DOT_WSL_NETWORKING=mirrored.
+  local mode="${DOT_WSL_NETWORKING:-nat}"
+
   local profile wslconfig
   if ! profile="$(windows_userprofile)" || [ -z "$profile" ]; then
     log_warn "Could not locate the Windows user profile via interop; skipping .wslconfig."
-    log_warn "Create %USERPROFILE%\\.wslconfig manually with: [wsl2] networkingMode=mirrored, dnsTunneling=true, autoProxy=true"
+    log_warn "Create %USERPROFILE%\\.wslconfig manually with: [wsl2] networkingMode=NAT, localhostForwarding=true, dnsTunneling=true, autoProxy=true"
     return 0
   fi
 
   wslconfig="$profile/.wslconfig"
-  log_info "Configuring $wslconfig (mirrored networking, DNS tunneling, auto proxy)..."
+  log_info "Configuring $wslconfig (networking: $mode, DNS tunneling, auto proxy)..."
 
   if [ -f "$wslconfig" ]; then
     cp "$wslconfig" "${wslconfig}.backup.$(date +%Y%m%d_%H%M%S)"
     log_info "Existing .wslconfig backed up."
   fi
 
-  set_ini_key "$wslconfig" "wsl2" "networkingMode" "mirrored"
+  if [ "$mode" = "mirrored" ]; then
+    set_ini_key "$wslconfig" "wsl2" "networkingMode" "mirrored"
+    # Lets WSL processes reach Windows services via 127.0.0.1 in mirrored mode
+    set_ini_key "$wslconfig" "experimental" "hostAddressLoopback" "true"
+    log_warn "networkingMode=mirrored requires Windows 11 22H2+ and is known to break localhost on some setups."
+    log_warn "If localhost times out after this, re-run with DOT_WSL_NETWORKING=nat."
+  else
+    set_ini_key "$wslconfig" "wsl2" "networkingMode" "NAT"
+    set_ini_key "$wslconfig" "wsl2" "localhostForwarding" "true"
+  fi
   set_ini_key "$wslconfig" "wsl2" "dnsTunneling" "true"
   set_ini_key "$wslconfig" "wsl2" "autoProxy" "true"
 
   log_info ".wslconfig updated:"
   sed 's/^/    /' "$wslconfig" >&2
-
-  log_warn "networkingMode=mirrored requires Windows 11 22H2+ (WSL falls back to NAT on older builds)."
 }
 
 check_filesystem_location() {

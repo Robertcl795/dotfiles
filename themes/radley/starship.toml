@@ -6,7 +6,7 @@ format = "$directory$os$git_branch$git_status$nodejs$rust$golang$php $character"
 
 [os]
 disabled = false
-format = "[$symbol](#blue) "
+format = "[$symbol](blue) "
 
 [os.symbols]
 Ubuntu  = "󰕈"

@@ -150,21 +150,23 @@ select_theme() {
     return 0
   fi
   if [ "$DOT_NONINTERACTIVE" = "1" ] || ! is_tty; then
-    DOT_THEME="cyber"
+    DOT_THEME="default"
     return 0
   fi
   log_info "Choose a Starship theme:"
-  echo "1) tron"
-  echo "2) cyber"
-  echo "3) eva01"
-  echo "4) radley"
-  read -r -p "Select [1-4] (default 2): " choice </dev/tty
+  echo "1) default"
+  echo "2) tron"
+  echo "3) cyber"
+  echo "4) eva01"
+  echo "5) radley"
+  read -r -p "Select [1-5] (default 1): " choice </dev/tty
   case "$choice" in
-    1) DOT_THEME="tron" ;;
-    2|"") DOT_THEME="cyber" ;;
-    3) DOT_THEME="eva01" ;;
-    4) DOT_THEME="radley" ;;
-    *) DOT_THEME="cyber" ;;
+    1|"") DOT_THEME="default" ;;
+    2) DOT_THEME="tron" ;;
+    3) DOT_THEME="cyber" ;;
+    4) DOT_THEME="eva01" ;;
+    5) DOT_THEME="radley" ;;
+    *) DOT_THEME="default" ;;
   esac
 }
 

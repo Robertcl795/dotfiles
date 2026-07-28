@@ -27,15 +27,18 @@ git clone https://github.com/Robertcl795/dotfiles.git ~/.dotfiles
 A brand-new `wsl -d archlinux` instance starts as **root** with no user.
 Run the same bootstrap command as root: it will update the system
 (`pacman -Syu`), enable sudo for the `wheel` group, prompt for a username
-(`useradd -m -G wheel`), and set it as the WSL default user. Then:
+and password (with confirmation), and set the new user as the WSL default.
+It then offers to run `wsl --shutdown` for you. Reopen Arch afterwards:
 
 ```powershell
-wsl --shutdown
 wsl -d archlinux   # now logs in as your user
 ```
 
-…and run the bootstrap again as that user to install everything else.
-For non-interactive first boot, pass `DOT_USERNAME=<name>`.
+…and the installation **continues automatically** — a one-shot hook in the
+new user's `~/.bashrc` resumes the bootstrap on first login (and removes
+itself). If the resume is interrupted, just run `~/.dotfiles/bootstrap.sh`.
+For non-interactive first boot, pass `DOT_USERNAME=<name>` (and optionally
+`DOT_PASSWORD=<pass>`).
 
 > **WSL tip:** keep the repo (and your projects) under `~/`, never under
 > `/mnt/c/...` — cross-OS I/O is 10-20x slower. The bootstrap moves out of
@@ -48,7 +51,7 @@ For non-interactive first boot, pass `DOT_USERNAME=<name>`.
 - **Zsh by default** (fish still available) with a base config vendored from
   [radleylewis/zsh](https://github.com/radleylewis/zsh): vi-mode,
   autosuggestions, fast-syntax-highlighting, history-substring-search
-- Starship prompt with Tron/Cyber/Eva01/Radley themes
+- Starship prompt (default config plus Tron/Cyber/Eva01/Radley themes)
 - Modern CLI: bat, eza, fzf, zoxide, ripgrep, fd, **lazygit, glow, duf,
   lazydocker, yazi, sshs, lnav, just**
 - **Zellij** as terminal multiplexer (replaces tmux)
@@ -62,21 +65,24 @@ For non-interactive first boot, pass `DOT_USERNAME=<name>`.
   into any repo with `make ai-scaffold TARGET=/path/to/repo` (see
   [`ai/README.md`](ai/README.md))
 - WSL2 optimizations: `.wslconfig` on the Windows host with
-  `networkingMode=mirrored`, `dnsTunneling=true`, `autoProxy=true`
-  (configured automatically via interop), systemd-enabled `/etc/wsl.conf`,
+  `networkingMode=NAT`, `localhostForwarding=true`, `dnsTunneling=true`,
+  `autoProxy=true` (configured automatically via interop; mirrored mode is
+  opt-in via `DOT_WSL_NETWORKING=mirrored`), systemd-enabled `/etc/wsl.conf`,
   and NTFS performance guards in the shell
 
 ## Customization (Interactive or Non-Interactive)
 
 Environment variables:
 ```bash
-DOT_SHELL=fish|zsh                 # default: zsh
-DOT_THEME=tron|cyber|eva01|radley  # default: cyber
+DOT_SHELL=fish|zsh                          # default: zsh
+DOT_THEME=default|tron|cyber|eva01|radley   # default: default
 DOT_ENABLE_K8S=0|1
 DOT_ENABLE_WSLCONFIG=0|1           # write .wslconfig on the Windows host
+DOT_WSL_NETWORKING=nat|mirrored    # default: nat (localhostForwarding=true)
 DOT_NONINTERACTIVE=1
 DOT_VERBOSE=1
 DOT_USERNAME=<name>                # Arch first boot: user to create (non-interactive)
+DOT_PASSWORD=<pass>                # Arch first boot: password for that user (non-interactive)
 DOT_NO_AUTOCD=1                    # don't auto-cd to ~ when a shell starts on /mnt/*
 DOTFILES_BRANCH=<branch>           # bootstrap from a branch other than main
 ```

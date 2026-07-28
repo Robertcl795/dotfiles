@@ -38,11 +38,42 @@ install_fnm() {
       || { log_warn "fnm installer failed."; return 1; }
   fi
   export PATH="$HOME/.local/bin:$PATH"
+  ensure_cmd fnm || { log_warn "fnm not on PATH; skipping Node.js setup."; return 1; }
 
-  if ensure_cmd fnm && [ -z "$(fnm ls 2>/dev/null | grep -v system || true)" ]; then
+  if [ -z "$(fnm ls 2>/dev/null | grep -v system || true)" ]; then
     log_info "Installing Node.js LTS via fnm..."
-    fnm install --lts || log_warn "Could not install Node LTS (network?); run 'fnm install --lts' later."
+    fnm install --lts \
+      || { log_warn "Could not install Node LTS (network?); run 'fnm install --lts' later."; return 1; }
   fi
+
+  # Make the LTS the default so every new shell (and the rest of this
+  # install) gets node without an explicit 'fnm use'.
+  if ! fnm ls 2>/dev/null | grep -q default; then
+    log_info "Setting Node.js LTS as the fnm default..."
+    fnm default lts-latest || log_warn "Could not set default Node version; run 'fnm default lts-latest' later."
+  fi
+  eval "$(fnm env --shell bash 2>/dev/null)" || true
+  fnm use default >/dev/null 2>&1 || true
+  log_info "Node: $(node --version 2>/dev/null || echo 'not on PATH yet (open a new shell)')"
+}
+
+install_pnpm() {
+  # Standalone pnpm: self-contained binary in PNPM_HOME, no corepack (and no
+  # dependency on the node version fnm happens to have active).
+  export PNPM_HOME="${PNPM_HOME:-$HOME/.local/share/pnpm}"
+  case ":$PATH:" in
+    *":$PNPM_HOME:"*) ;;
+    *) export PATH="$PNPM_HOME:$PATH" ;;
+  esac
+
+  if ! ensure_cmd pnpm; then
+    log_info "Installing pnpm (standalone script, no corepack)..."
+    # SHELL is pinned to bash so the installer only ever touches ~/.bashrc;
+    # zsh/fish PATH setup is handled by the dotfiles themselves.
+    curl -fsSL https://get.pnpm.io/install.sh | env PNPM_HOME="$PNPM_HOME" SHELL="$(command -v bash)" sh - \
+      || log_warn "pnpm installer failed; run later: curl -fsSL https://get.pnpm.io/install.sh | sh -"
+  fi
+  log_info "pnpm: $(pnpm --version 2>/dev/null || echo 'not on PATH yet (open a new shell)')"
 }
 
 install_uv() {
@@ -58,9 +89,13 @@ install_uv() {
 }
 
 install_lang_toolchains() {
-  log_step "Phase 8: Language toolchains (rustup / fnm / uv)"
+  log_step "Phase 8: Language toolchains (rustup / fnm+pnpm / uv)"
   install_rustup
-  install_fnm
+  if install_fnm; then
+    install_pnpm
+  else
+    log_warn "Skipping pnpm (Node.js setup did not complete)."
+  fi
   install_uv
 }
 
