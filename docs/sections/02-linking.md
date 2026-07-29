@@ -15,6 +15,11 @@ already exists and isn't already the correct symlink, it's moved to
 | `shells/zsh/zshrc` | `~/.zshrc` |
 | `shells/zsh` | `~/.config/zsh` |
 | `nvim` | `~/.config/nvim` |
+| `config/fastfetch` | `~/.config/fastfetch` |
+
+`~/.config/starship.toml` is linked separately in
+[phase 4](04-prompt.md), since which file it points at depends on
+`DOT_THEME`.
 
 Re-running the bootstrap is safe: if the symlink already points at the
 repo, `symlink_with_backup` is a no-op; nothing is re-backed-up on every

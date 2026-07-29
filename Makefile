@@ -1,57 +1,34 @@
-.PHONY: help install update test uninstall backup clean configure sync-radleylewis
+.PHONY: help install test theme fastfetch ai-deploy ai-scaffold backup clean
 
 # Default target
 help:
-	@echo "Dotfiles Management Commands:"
+	@echo "Dotfiles — make targets"
 	@echo ""
-	@echo "  make install    - Install dotfiles and setup environment"
-	@echo "  make configure  - Configure Git and SSH settings interactively"
-	@echo "  make update     - Update dotfiles and dependencies"
-	@echo "  make test       - Run tests to verify installation"
-	@echo "  make uninstall  - Remove dotfiles and restore backups"
-	@echo "  make backup     - Create backup of current configuration"
-	@echo "  make clean      - Clean backup files"
+	@echo "  make install                     Run the full bootstrap (install/run.sh)"
+	@echo "  make test                        Run every checkpoint (tests/99_smoke.sh)"
+	@echo "  make theme THEME=<name>          Switch prompt theme"
+	@echo "                                   (default|tron|cyber|eva01|minimal)"
+	@echo "  make fastfetch                   Reinstall/relink the fastfetch greeting"
+	@echo "  make ai-deploy                   Deploy the AI development standard globally"
+	@echo "  make ai-scaffold TARGET=<path>   Scaffold the AI standard into a repo"
+	@echo "  make backup                      Back up shell/git configs from \$$HOME"
+	@echo "  make clean                       Remove local backup/ contents"
 	@echo ""
 
 install:
 	@echo "🚀 Installing dotfiles..."
-	@bash install.sh
-
-configure:
-	@echo "⚙️  Configuring dotfiles..."
-	@bash configure.sh
-
-update:
-	@echo "🔄 Updating dotfiles..."
-	@bash update.sh
+	@bash install/run.sh
 
 test:
-	@echo "🧪 Running tests..."
-	@bash test.sh
+	@echo "🧪 Running checkpoints..."
+	@bash tests/99_smoke.sh
 
-uninstall:
-	@echo "🗑️  Uninstalling dotfiles..."
-	@bash uninstall.sh
+theme:
+	@test -n "$(THEME)" || (echo "Usage: make theme THEME=default|tron|cyber|eva01|minimal" && exit 1)
+	@DOT_THEME=$(THEME) bash install/prompt/starship.sh --run
 
-backup:
-	@echo "💾 Creating backup..."
-	@mkdir -p backup
-	@for file in .zshrc .gitconfig .gitconfig.work .gitconfig.personal .zsh_aliases .zsh_functions; do \
-		if [ -f "$$HOME/$$file" ]; then \
-			cp "$$HOME/$$file" "backup/$$file.$(shell date +%Y%m%d-%H%M%S)"; \
-			echo "✓ Backed up $$file"; \
-		fi \
-	done
-	@echo "✓ Backup complete"
-
-clean:
-	@echo "🧹 Cleaning backup files..."
-	@rm -rf backup/*
-	@echo "✓ Backup files cleaned"
-
-sync-radleylewis:
-	@echo "🔄 Syncing vendored radleylewis config from upstream..."
-	@bash install/shell/radleylewis.sh --run
+fastfetch:
+	@bash install/fastfetch.sh --run
 
 ai-deploy:
 	@echo "🤖 Deploying AI development standard..."
@@ -61,3 +38,18 @@ ai-scaffold:
 	@test -n "$(TARGET)" || (echo "Usage: make ai-scaffold TARGET=/path/to/repo" && exit 1)
 	@bash ai/scaffold.sh "$(TARGET)"
 
+backup:
+	@echo "💾 Creating backup..."
+	@mkdir -p backup
+	@for file in .zshrc .zshrc.local .gitconfig .config/starship.toml .config/fastfetch/config.jsonc; do \
+		if [ -f "$$HOME/$$file" ]; then \
+			cp "$$HOME/$$file" "backup/$$(basename $$file).$(shell date +%Y%m%d-%H%M%S)"; \
+			echo "✓ Backed up $$file"; \
+		fi \
+	done
+	@echo "✓ Backup complete"
+
+clean:
+	@echo "🧹 Cleaning backup files..."
+	@rm -rf backup/*
+	@echo "✓ Backup files cleaned"

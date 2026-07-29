@@ -51,9 +51,9 @@ Non-interactive, with explicit theme/K8s choice:
 | --- | --- |
 | `windows/common.ps1` | Logging, backups, `Confirm-Action`, theme selection — the Windows equivalent of `install/common.sh`. Dot-sourced by every other script in this list. |
 | `windows/packages.ps1` | Installs [scoop](https://scoop.sh) itself if missing, adds the `extras`/`versions` buckets, then installs the CLI stack. |
-| `windows/profile.ps1` | Writes a managed block into the pwsh `$PROFILE` (idempotent — re-running replaces only the block between `# >>> dotfiles managed block` markers, your own additions above/below are untouched). |
+| `windows/profile.ps1` | Writes a managed block into the pwsh `$PROFILE` (idempotent — re-running replaces only the block between `# >>> dotfiles managed block` markers, your own additions above/below are untouched): prompt, PSReadLine predictions, PSFzf bindings, modern-CLI aliases, [git aliases](../CHEATSHEET.md#git), and the fastfetch greeting. Also junctions `config\fastfetch` into `~\.config\fastfetch`. |
 | `windows/terminal.ps1` | Adds all four `themes/*/windows-terminal.json` color schemes to Windows Terminal's `settings.json` and applies the selected one **to the PowerShell profile entry only**. |
-| `windows/summary.ps1` | Same installed-tools summary as the bash side, printed at the end of a successful run — see [12-summary.md](../sections/12-summary.md). |
+| `windows/summary.ps1` | Same installed-tools summary as the bash side, printed at the end of a successful run — see [13-summary.md](../sections/13-summary.md). |
 
 ## Package manager: scoop, not apt/pacman
 
@@ -67,14 +67,14 @@ pattern `install/packages/ubuntu.sh` uses for tools apt doesn't have.
 Covered (majority of the WSL stack, same names): `git`, `7zip`,
 `starship`, `ripgrep`, `fd`, `bat`, `eza`, `fzf`, `zoxide`, `neovim`,
 `lazygit`, `glow`, `duf`, `lnav`, `just`, `zellij`, `yazi`, `lazydocker`,
-`sshs`, `rustup`, `fnm`, `uv`, `gh`, plus `claude`/`opencode` via their
+`fastfetch`, `sshs`, `rustup`, `fnm`, `uv`, `gh`, plus `claude`/`opencode` via their
 official `.ps1` installers, and `kubectl`/`helm`/`k3d` if
 `DOT_ENABLE_K8S=1`.
 
 **Not covered** (WSL/bash-only, no native-Windows equivalent yet): fish
-shell setup, the vendored radleylewis zsh config, `install/link.sh`'s
-symlink-based dotfile linking, and phase 11's AI Development Standard
-deployment (`ai/` → `~/.claude/*`, context DB). `k3d` additionally
+shell setup, the `config/zsh` modules, `install/link.sh`'s symlink-based
+dotfile linking, and phase 11's AI Development Standard deployment
+(`ai/` → `~/.claude/*`, context DB). `k3d` additionally
 requires Docker Desktop with the WSL2 backend, since it runs containers
 either way. **`pwsh` (PowerShell 7) itself is also not installed** — see
 the prerequisite callout above; every other tool in this list installs
@@ -106,7 +106,7 @@ terminal.ps1`:
    parsing still fails, the file is left completely untouched and a
    warning is printed rather than risking corruption).
 4. Merges in all four `themes/*/windows-terminal.json` schemes
-   (`dotfiles-tron`, `dotfiles-cyber`, `dotfiles-eva01`, `dotfiles-radley`)
+   (`dotfiles-tron`, `dotfiles-cyber`, `dotfiles-eva01`, `dotfiles-minimal`)
    by name — existing schemes with other names are kept as-is.
 5. Sets `colorScheme` **only** on profile entries that look like
    PowerShell (`commandline` matching `pwsh`/`powershell.exe`, `name`

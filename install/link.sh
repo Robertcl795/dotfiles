@@ -20,6 +20,8 @@ link_dotfiles() {
 
   symlink_with_backup "$DOTFILES_DIR/nvim" "$HOME/.config/nvim"
 
+  symlink_with_backup "$DOTFILES_DIR/config/fastfetch" "$HOME/.config/fastfetch"
+
   log_info "Symlinks created."
 }
 

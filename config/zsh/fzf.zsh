@@ -1,4 +1,4 @@
-# Vendored from https://github.com/radleylewis/zsh (fzf.zsh)
+# fzf defaults, preview command and the Ctrl+F file picker widget.
 
 # =========================================================
 # fzf

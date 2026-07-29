@@ -85,7 +85,7 @@ function Install-Packages {
     $coreApps = @(
         'git', '7zip', 'starship', 'ripgrep', 'fd', 'bat', 'eza', 'fzf',
         'zoxide', 'neovim', 'lazygit', 'glow', 'duf', 'lnav', 'just',
-        'zellij', 'yazi', 'lazydocker'
+        'zellij', 'yazi', 'lazydocker', 'fastfetch'
     )
     foreach ($app in $coreApps) { Install-ScoopApp -Name $app }
 

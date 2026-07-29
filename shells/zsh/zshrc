@@ -1,7 +1,6 @@
 # ~/.zshrc — entrypoint (symlinked from shells/zsh/zshrc)
-# Base configuration vendored from radleylewis/zsh lives in
-# config/zsh/radleylewis/; local overrides go in shells/zsh/aliases.zsh
-# or ~/.zshrc.local.
+# The configuration itself is split into modules under config/zsh/;
+# machine-local overrides go in ~/.zshrc.local.
 
 # =========================================================
 # Environment
@@ -32,39 +31,33 @@ if [ -z "${DOTFILES_DIR:-}" ]; then
 fi
 
 # =========================================================
-# Base config (vendored from radleylewis/zsh, see config/zsh/radleylewis/)
-# Order matters: bindings must run before plugins (zsh-vi-mode reads its
-# ZVM_* settings at load time).
+# Modules (config/zsh/*.zsh)
+#
+# Order matters:
+#   core     compinit — must run before git.zsh registers completions
+#   bindings must run before plugins (zsh-vi-mode reads its ZVM_* settings
+#            at load time)
+#   dev/wsl  after the aliases they may override
 # =========================================================
 
-RL_ZSH_DIR="$DOTFILES_DIR/config/zsh/radleylewis"
-for _rl_module in core fzf aliases bindings plugins prompt; do
-  [ -f "$RL_ZSH_DIR/${_rl_module}.zsh" ] && source "$RL_ZSH_DIR/${_rl_module}.zsh"
+ZSH_MODULE_DIR="$DOTFILES_DIR/config/zsh"
+for _zsh_module in core fzf aliases git bindings plugins prompt dev wsl; do
+  [ -f "$ZSH_MODULE_DIR/${_zsh_module}.zsh" ] && source "$ZSH_MODULE_DIR/${_zsh_module}.zsh"
 done
-unset _rl_module
-
-# =========================================================
-# Version managers & dev environment
-# =========================================================
-
-if [ -f "$DOTFILES_DIR/config/zsh/dev.zsh" ]; then
-  source "$DOTFILES_DIR/config/zsh/dev.zsh"
-fi
-
-# =========================================================
-# WSL helpers (filesystem performance guard, interop aliases)
-# =========================================================
-
-if [ -f "$DOTFILES_DIR/config/zsh/wsl.zsh" ]; then
-  source "$DOTFILES_DIR/config/zsh/wsl.zsh"
-fi
+unset _zsh_module
 
 # =========================================================
 # Local overrides
 # =========================================================
 
-if [ -f "$DOTFILES_DIR/shells/zsh/aliases.zsh" ]; then
-  source "$DOTFILES_DIR/shells/zsh/aliases.zsh"
-fi
-
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
+
+# =========================================================
+# Greeting (fastfetch) — last, so it renders below everything the
+# modules above may print. Skipped for non-interactive shells, inside
+# editors/multiplexer panes, and when DOT_NO_FASTFETCH=1.
+# =========================================================
+
+if [ -f "$DOTFILES_DIR/config/zsh/greeting.zsh" ]; then
+  source "$DOTFILES_DIR/config/zsh/greeting.zsh"
+fi

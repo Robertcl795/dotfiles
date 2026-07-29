@@ -1,6 +1,5 @@
-# Vendored from https://github.com/radleylewis/zsh (aliases.zsh)
-# Adapted for Robertcl795/dotfiles: lf replaced by yazi, machine-specific
-# aliases dropped, everything guarded on the tool being installed.
+# General aliases (listing, core utils, navigation, editor).
+# Git aliases live in git.zsh. Everything is guarded on the tool existing.
 
 # =========================================================
 # Listing (eza)
@@ -69,15 +68,9 @@ y() {
 alias vim='nvim'
 
 # =========================================================
-# Git
-# =========================================================
-
-alias glog='PAGER="less -F -X" git log'                              # -F quit if one screen, -X no clear on exit
-alias gadog='PAGER="less -F -X" git log --all --decorate --oneline --graph'
-
-# =========================================================
 # Modern CLI stack shortcuts
 # =========================================================
 
 alias lg='lazygit'
 alias ld='lazydocker'
+alias ff='fastfetch'
