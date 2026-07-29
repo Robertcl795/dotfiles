@@ -9,6 +9,10 @@ SCRIPT_DIR="$(cd -- "$(dirname "$SOURCE_PATH")" && pwd)"
 source "$SCRIPT_DIR/../common.sh"
 
 install_starship() {
+  if ! tool_selected starship; then
+    log_info "Phase 4: Starship not selected, skipping (your shell keeps its default prompt)."
+    return 0
+  fi
   log_step "Phase 4: Prompt themes (Starship)"
 
   if ! ensure_cmd starship; then

@@ -6,15 +6,14 @@
 
 if ($env:DOT_VERBOSE -eq '1') { Set-PSDebug -Trace 1 }
 
-Select-Theme
+# One interactive screen decides everything: which tools and which theme.
+# Quitting it aborts before anything is installed.
+. "$PSScriptRoot\tools.ps1"
+if (-not (Resolve-ToolSelection)) { return }
+
+if (-not $env:DOT_THEME) { Select-Theme }
 if (-not $env:DOT_ENABLE_K8S) {
-    if ((Test-IsInteractive) -and (Confirm-Action -Prompt 'Enable Kubernetes tooling (kubectl/helm/k3d)?' -Default 'y')) {
-        $env:DOT_ENABLE_K8S = '1'
-    } elseif (Test-IsInteractive) {
-        $env:DOT_ENABLE_K8S = '0'
-    } else {
-        $env:DOT_ENABLE_K8S = '1'
-    }
+    $env:DOT_ENABLE_K8S = if (@('kubectl', 'helm', 'k3d') | Where-Object { Test-ToolSelected $_ }) { '1' } else { '0' }
 }
 
 Write-Step 'Starting native PowerShell bootstrap...'

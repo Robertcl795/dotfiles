@@ -25,6 +25,21 @@ modules in [`config/zsh/`](../../config/zsh) in a fixed order:
 | `wsl.zsh` | NTFS performance guard, interop aliases |
 | `greeting.zsh` | [fastfetch banner](12-fastfetch.md) |
 
+```mermaid
+flowchart TD
+    Z["~/.zshrc"] --> C["core.zsh<br/><i>history · options · compinit</i>"]
+    C --> F["fzf.zsh"]
+    F --> A["aliases.zsh"]
+    A --> G["git.zsh<br/><i>needs compinit → compdef</i>"]
+    G --> B["bindings.zsh<br/><i>sets ZVM_* first</i>"]
+    B --> P["plugins.zsh<br/><i>reads ZVM_* at load</i>"]
+    P --> PR["prompt.zsh"]
+    PR --> D["dev.zsh"]
+    D --> W["wsl.zsh"]
+    W --> L["~/.zshrc.local<br/><i>yours, never touched</i>"]
+    L --> GR["greeting.zsh<br/><i>fastfetch, last</i>"]
+```
+
 **Order matters** in two places: `core.zsh` runs `compinit` before `git.zsh`
 registers its completions, and `bindings.zsh` runs before `plugins.zsh`
 because zsh-vi-mode reads its `ZVM_*` settings at load time.

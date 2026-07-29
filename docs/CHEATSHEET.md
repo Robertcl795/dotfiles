@@ -178,7 +178,8 @@ gh copilot suggest "..."     # after: gh auth login
 
 ## Kubernetes
 
-Installed only when `DOT_ENABLE_K8S=1`.
+Installed only if you kept the Kubernetes section in the
+[picker](SELECTION.md) (or set `DOT_ENABLE_K8S=1`).
 
 ```bash
 kubectl get pods
@@ -190,6 +191,7 @@ k3d cluster delete dev
 ## Dotfiles management
 
 ```bash
+bash install/select.sh --run     # re-open the tool picker
 make install                     # re-run the full bootstrap (idempotent)
 make test                        # every checkpoint
 make theme THEME=tron            # switch prompt theme

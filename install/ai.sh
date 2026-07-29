@@ -15,6 +15,10 @@ source "$SCRIPT_DIR/common.sh"
 # plus: uv environment for the vector context DB and MCP registration.
 
 install_ai_standard() {
+  if ! tool_selected ai-standard; then
+    log_info "Phase 11: AI development standard not selected, skipping."
+    return 0
+  fi
   log_step "Phase 11: AI development standard"
 
   local ai_dir="$DOTFILES_DIR/ai"

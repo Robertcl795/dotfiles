@@ -37,14 +37,15 @@ install_k3d() {
 }
 
 install_k8s_tools() {
-  if [ "$DOT_ENABLE_K8S" != "1" ]; then
-    log_info "K8s tooling disabled (DOT_ENABLE_K8S=0)."
+  if ! any_tool_selected kubectl helm k3d; then
+    log_info "Phase 6: no Kubernetes tooling selected, skipping."
     return 0
   fi
   log_step "Phase 6: Dev environment (k8s)"
-  install_kubectl
-  install_helm
-  install_k3d
+  tool_selected kubectl && install_kubectl
+  tool_selected helm && install_helm
+  tool_selected k3d && install_k3d
+  return 0
 }
 
 if [ "${1:-}" = "--run" ]; then

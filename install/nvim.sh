@@ -9,6 +9,10 @@ SCRIPT_DIR="$(cd -- "$(dirname "$SOURCE_PATH")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
 install_nvim() {
+  if ! tool_selected neovim; then
+    log_info "Phase 5: Neovim not selected, skipping."
+    return 0
+  fi
   log_step "Phase 5: Neovim"
 
   if ! ensure_cmd nvim; then

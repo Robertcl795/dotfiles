@@ -20,6 +20,23 @@ install messages).
 
 ## When it stays quiet
 
+```mermaid
+flowchart TD
+    S["new shell"] --> I{"interactive?"}
+    I -- no --> X["stay quiet"]
+    I -- yes --> T{"stdout a TTY?"}
+    T -- no --> X
+    T -- yes --> O{"DOT_NO_FASTFETCH?"}
+    O -- set --> X
+    O -- unset --> B{"fastfetch<br/>installed?"}
+    B -- no --> X
+    B -- yes --> E{"editor terminal<br/>or dumb TERM?"}
+    E -- yes --> X
+    E -- no --> W{"≥ 70 columns?"}
+    W -- no --> N["fastfetch --logo none"]
+    W -- yes --> Y["fastfetch"]
+```
+
 The banner is skipped — silently, never with an error — when any of these
 hold:
 

@@ -13,6 +13,19 @@ make theme THEME=tron            # or: DOT_THEME=tron bash install/prompt/starsh
 The change is a symlink swap on `~/.config/starship.toml` — it takes effect
 in the next shell, no re-bootstrap needed.
 
+## Which one?
+
+```mermaid
+flowchart TD
+    A{"Nerd Font<br/>installed?"} -- no --> B{"favourite colour?"}
+    A -- yes --> C{"how much<br/>information?"}
+    B -- cyan --> T["tron"]
+    B -- green --> CY["cyber"]
+    B -- purple --> E["eva01"]
+    C -- "everything" --> D["default"]
+    C -- "just the essentials" --> M["minimal"]
+```
+
 ## Gallery
 
 ### `default`

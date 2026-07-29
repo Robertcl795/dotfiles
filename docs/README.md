@@ -1,4 +1,4 @@
-# Documentation
+# Rocker Labs Dotfiles — documentation
 
 Start here. The root [README](../README.md) has the install one-liners; this
 is the map of everything else.
@@ -7,6 +7,7 @@ is the map of everything else.
 
 | I want to… | Go to |
 | --- | --- |
+| Choose which tools get installed | [SELECTION.md](SELECTION.md) |
 | See every tool, what it replaces, and its alias | [TOOLS.md](TOOLS.md) |
 | Pick or preview a prompt theme | [THEMES.md](THEMES.md) |
 | Look up a command or keybinding | [CHEATSHEET.md](CHEATSHEET.md) |
@@ -14,6 +15,26 @@ is the map of everything else.
 | Understand one bootstrap phase | [Phases](#bootstrap-phases) |
 | Read OS-specific behaviour | [Arch](os/arch.md) · [Ubuntu](os/ubuntu.md) · [Windows](os/windows.md) |
 | Fix something that broke | [Troubleshooting](CHEATSHEET.md#troubleshooting) |
+
+## How a run flows
+
+```mermaid
+flowchart TD
+    S["🎛 install/select.sh<br/><i>pick tools, shell, theme</i>"]
+    S --> C["install/common.sh<br/><i>resolves the selection<br/>for every phase</i>"]
+    C --> P0["0 · preflight"]
+    P0 --> P1["1 · packages<br/><i>only what you picked</i>"]
+    P1 --> P2["2 · symlinks"]
+    P2 --> P3["3 · shell"]
+    P3 --> P4["4 · prompt"]
+    P4 --> P5["5-11 · editor, k8s, zellij,<br/>languages, AI, WSL"]
+    P5 --> P12["12 · greeting"]
+    P12 --> SUM["summary"]
+    C -. "each phase asks tool_selected" .-> P5
+```
+
+Each phase asks `tool_selected <id>` before doing anything, so a deselected
+tool is skipped with a one-line note rather than installed anyway.
 
 ## Config map
 
@@ -53,6 +74,7 @@ checkpoint validates.
 
 | # | Script | What it does | Doc |
 | --- | --- | --- | --- |
+| — | `install/select.sh` | Tool picker (before everything) | [SELECTION](SELECTION.md) |
 | 0 | `install/detect_os.sh` | OS detection, network + sudo preflight | [00](sections/00-preflight.md) |
 | 1 | `install/packages/{ubuntu,arch}.sh` | System update, CLI stack | [01](sections/01-packages.md) |
 | 2 | `install/link.sh` | Symlinks (with timestamped backups) | [02](sections/02-linking.md) |

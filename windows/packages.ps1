@@ -81,42 +81,37 @@ function Install-Packages {
     Install-ScoopBucket -Name versions
     Add-LocalBinToPath
 
-    Write-Step 'Modern CLI stack'
-    $coreApps = @(
-        'git', '7zip', 'starship', 'ripgrep', 'fd', 'bat', 'eza', 'fzf',
-        'zoxide', 'neovim', 'lazygit', 'glow', 'duf', 'lnav', 'just',
-        'zellij', 'yazi', 'lazydocker', 'fastfetch'
-    )
-    foreach ($app in $coreApps) { Install-ScoopApp -Name $app }
+    # Always installed: the bootstrap itself needs these.
+    foreach ($app in @('git', '7zip')) { Install-ScoopApp -Name $app }
+
+    # Everything else comes from the selection (windows/tools.ps1).
+    $selected = Get-SelectedScoopPackages
+    if ($selected.Count -gt 0) {
+        Write-Step "Selected packages ($($selected.Count))"
+        foreach ($app in $selected) { Install-ScoopApp -Name $app }
+    } else {
+        Write-Info 'No scoop-installable tools selected.'
+    }
 
     # No scoop manifest for sshs; grab the Windows release binary directly.
-    if (-not (Test-CommandExists sshs)) {
+    if ((Test-ToolSelected 'sshs') -and -not (Test-CommandExists sshs)) {
         Install-ReleaseBinary -Name sshs -Url 'https://github.com/quantumsheep/sshs/releases/latest/download/sshs-windows-x86_64.zip'
     }
 
-    Write-Step 'Language toolchains (rustup / fnm / uv)'
-    foreach ($app in @('rustup', 'fnm', 'uv')) { Install-ScoopApp -Name $app }
-    if ((Test-CommandExists rustup) -and -not (Test-CommandExists rustc)) {
+    if ((Test-ToolSelected 'rustup') -and (Test-CommandExists rustup) -and -not (Test-CommandExists rustc)) {
         try { rustup default stable | Out-Null } catch { Write-WarnMsg "rustup default stable failed: $($_.Exception.Message)" }
     }
 
-    if ($env:DOT_ENABLE_K8S -eq '1') {
-        Write-Step 'Kubernetes tooling (kubectl / helm / k3d)'
-        foreach ($app in @('kubectl', 'helm', 'k3d')) { Install-ScoopApp -Name $app }
-    } else {
-        Write-Info 'K8s tooling disabled (DOT_ENABLE_K8S=0).'
-    }
-
-    Write-Step 'AI tooling (claude / gh / opencode)'
-    Install-ScoopApp -Name gh
-    if (-not (Test-CommandExists claude)) {
+    if (-not (Test-ToolSelected 'claude')) {
+        Write-Info 'Claude Code not selected, skipping.'
+    } elseif (-not (Test-CommandExists claude)) {
         try {
             Invoke-RestMethod -Uri 'https://claude.ai/install.ps1' | Invoke-Expression
         } catch {
             Write-WarnMsg "Claude Code install failed; retry later with: irm https://claude.ai/install.ps1 | iex"
         }
     }
-    if (-not (Test-CommandExists opencode)) {
+    if ((Test-ToolSelected 'opencode') -and -not (Test-CommandExists opencode)) {
         try {
             Invoke-RestMethod -Uri 'https://opencode.ai/install.ps1' | Invoke-Expression
         } catch {

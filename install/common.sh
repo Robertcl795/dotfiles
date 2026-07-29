@@ -16,6 +16,12 @@ DOT_ENABLE_K8S="${DOT_ENABLE_K8S:-}"
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; CYAN='\033[0;36m'; NC='\033[0m'
 
+# Tool registry + `tool_selected`. Sourced here so every phase script gets
+# the gate for free, including when one is run on its own
+# (`bash install/nvim.sh --run`) with a selection saved from a previous run.
+# shellcheck source=install/tools.sh
+source "$SCRIPT_DIR/tools.sh"
+
 log_info() { echo -e "${BLUE}[INFO]${NC} $*" >&2; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $*" >&2; }
 log_error() { echo -e "${RED}[ERROR]${NC} $*" >&2; }
@@ -177,4 +183,14 @@ select_theme() {
   esac
 }
 
+# Resolve the tool selection (env var > saved picker choice > registry
+# defaults) so `tool_selected` answers correctly in every phase. A bad id in
+# DOT_TOOLS is fatal — silently skipping a tool the user asked for would be
+# discovered much later than a hard stop here.
+tools_resolve || exit 1
+
+# DOT_TOOLS is deliberately *not* exported: each phase re-resolves it from
+# the saved selection, so an exported default here would be indistinguishable
+# from the user pinning DOT_TOOLS=... on the command line (and would stop the
+# picker from ever opening).
 export DOTFILES_DIR DOT_NONINTERACTIVE DOT_VERBOSE DOT_SHELL DOT_THEME DOT_ENABLE_K8S

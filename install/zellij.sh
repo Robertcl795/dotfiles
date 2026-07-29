@@ -9,6 +9,10 @@ SCRIPT_DIR="$(cd -- "$(dirname "$SOURCE_PATH")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
 install_zellij() {
+  if ! tool_selected zellij; then
+    log_info "Phase 7: Zellij not selected, skipping."
+    return 0
+  fi
   log_step "Phase 7: Zellij multiplexer"
 
   if ! ensure_cmd zellij; then

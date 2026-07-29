@@ -7,6 +7,10 @@ Installs the base toolchain and modern CLI stack: `git curl wget unzip
 ca-certificates ripgrep fd bat eza fzf zoxide neovim starship tldr fish zsh`
 plus `lazygit glow duf lazydocker yazi sshs lnav just zellij fastfetch`.
 
+…but only the ones you kept in the [picker](../SELECTION.md). The package
+list is built at run time from the selection (`tools_packages arch|ubuntu`),
+so deselecting `yazi` means pacman/apt is never asked for it.
+
 Full matrix of what each tool replaces and how to reach it:
 [TOOLS.md](../TOOLS.md).
 

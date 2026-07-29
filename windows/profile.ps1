@@ -29,7 +29,7 @@ function New-ManagedProfileBlock {
 
     return @"
 $script:ManagedBeginMarker
-# Managed by Robertcl795/dotfiles (windows/profile.ps1). Re-running the
+# Managed by Rocker Labs Dotfiles (windows/profile.ps1). Re-running the
 # bootstrap replaces everything between the markers; edits outside them
 # (above or below) are left alone.
 

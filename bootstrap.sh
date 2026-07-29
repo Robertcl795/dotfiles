@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Bootstrap script for dotfiles installation
+# Rocker Labs Dotfiles — bootstrap entry point
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/Robertcl795/dotfiles/main/bootstrap.sh | bash
 #   OR cloned: ./bootstrap.sh

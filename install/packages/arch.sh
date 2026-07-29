@@ -19,13 +19,22 @@ install_packages_arch() {
 
   sudo pacman -Sy --noconfirm
 
+  # Always installed: the bootstrap itself needs these.
   sudo pacman -S --noconfirm --needed \
-    base-devel git curl wget unzip ca-certificates \
-    ripgrep fd bat eza fzf zoxide neovim starship \
-    tldr fish zsh \
-    lazygit glow duf lazydocker yazi lnav just zellij fastfetch
+    base-devel git curl wget unzip ca-certificates fish zsh
 
-  install_sshs_arch
+  # Everything else comes from the selection (install/tools.sh).
+  local selected
+  selected="$(tools_packages arch)"
+  if [ -n "$selected" ]; then
+    log_info "Installing selected packages: $selected"
+    # shellcheck disable=SC2086
+    sudo pacman -S --noconfirm --needed $selected
+  else
+    log_info "No pacman-installable tools selected."
+  fi
+
+  tool_selected sshs && install_sshs_arch
 
   log_info "Base packages installed."
 }

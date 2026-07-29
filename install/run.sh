@@ -12,21 +12,17 @@ if [ "$DOT_VERBOSE" = "1" ]; then
   set -x
 fi
 
-if [ "$DOT_NONINTERACTIVE" != "1" ] && is_tty; then
-  select_shell
-  select_theme
-  if [ -z "${DOT_ENABLE_K8S:-}" ]; then
-    if confirm "Enable Kubernetes tooling (kubectl/helm/k3d)?" "y"; then
-      DOT_ENABLE_K8S=1
-    else
-      DOT_ENABLE_K8S=0
-    fi
-  fi
-else
-  DOT_ENABLE_K8S="${DOT_ENABLE_K8S:-1}"
-  select_shell
-  select_theme
-fi
+# One interactive screen decides everything: which tools, which shell, which
+# theme. It writes the choice to ~/.config/rocker-dotfiles/selection.conf,
+# which common.sh then loads for every phase (including standalone re-runs).
+# Quitting the picker aborts before anything is installed.
+bash "$DOTFILES_DIR/install/select.sh" --run || die "Installation cancelled."
+
+# Pick the saved answer back up in this process (a DOT_TOOLS set in the
+# environment still wins over what the picker wrote).
+tools_reload_selection || die "Could not resolve the tool selection."
+select_shell
+select_theme
 
 export DOT_ENABLE_K8S
 

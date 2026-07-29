@@ -52,10 +52,15 @@ install_gh_copilot() {
 }
 
 install_ai_tools() {
+  if ! any_tool_selected claude opencode gh; then
+    log_info "Phase 9: no AI tooling selected, skipping."
+    return 0
+  fi
   log_step "Phase 9: AI tooling (claude / opencode / gh copilot)"
-  install_claude_cli
-  install_opencode_cli
-  install_gh_copilot
+  tool_selected claude && install_claude_cli
+  tool_selected opencode && install_opencode_cli
+  tool_selected gh && install_gh_copilot
+  return 0
 }
 
 if [ "${1:-}" = "--run" ]; then

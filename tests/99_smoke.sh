@@ -18,7 +18,8 @@ for t in \
   "$SCRIPT_DIR/07_devstack.sh" \
   "$SCRIPT_DIR/08_wsl.sh" \
   "$SCRIPT_DIR/09_ai.sh" \
-  "$SCRIPT_DIR/12_fastfetch.sh"
+  "$SCRIPT_DIR/12_fastfetch.sh" \
+  "$SCRIPT_DIR/13_selection.sh"
 do
   bash "$t"
 done

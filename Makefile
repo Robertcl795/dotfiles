@@ -2,7 +2,7 @@
 
 # Default target
 help:
-	@echo "Dotfiles — make targets"
+	@echo "Rocker Labs Dotfiles — make targets"
 	@echo ""
 	@echo "  make install                     Run the full bootstrap (install/run.sh)"
 	@echo "  make test                        Run every checkpoint (tests/99_smoke.sh)"
@@ -16,7 +16,7 @@ help:
 	@echo ""
 
 install:
-	@echo "🚀 Installing dotfiles..."
+	@echo "🚀 Installing Rocker Labs Dotfiles..."
 	@bash install/run.sh
 
 test:

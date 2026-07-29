@@ -1,6 +1,10 @@
 # Tools
 
-Every tool the bootstrap installs, what it replaces, and how to reach it.
+Every tool the bootstrap *can* install, what it replaces, and how to reach
+it. Which ones actually get installed is up to you — the
+[picker](SELECTION.md) runs first, and each row here maps to one id in
+[`install/tools.sh`](../install/tools.sh).
+
 Installed by [phase 1](sections/01-packages.md) unless noted; verify the lot
 with `tests/01_packages.sh` or `bash install/summary.sh --run`.
 
@@ -58,7 +62,7 @@ launch is instant and works offline. Update them with `zplugin-update`.
 | [uv](https://github.com/astral-sh/uv) | Python envs + packages | `uv venv`, `uv pip` | [08](sections/08-lang-toolchains.md) |
 | pnpm | Node packages | `pnpm` (standalone, no corepack) | [08](sections/08-lang-toolchains.md) |
 
-## Kubernetes (opt-in, `DOT_ENABLE_K8S=1`)
+## Kubernetes (deselect in the picker if you don't want it)
 
 | Tool | Role | Docs |
 | --- | --- | --- |

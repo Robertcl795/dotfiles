@@ -15,6 +15,10 @@ SCRIPT_DIR="$(cd -- "$(dirname "$SOURCE_PATH")" && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
 install_fastfetch() {
+  if ! tool_selected fastfetch; then
+    log_info "Phase 12: fastfetch not selected, skipping (shells start without a greeting)."
+    return 0
+  fi
   log_step "Phase 12: Shell greeting (fastfetch)"
 
   if ! ensure_cmd fastfetch; then

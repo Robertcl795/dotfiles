@@ -50,6 +50,7 @@ Non-interactive, with explicit theme/K8s choice:
 | Script | Does |
 | --- | --- |
 | `windows/common.ps1` | Logging, backups, `Confirm-Action`, theme selection — the Windows equivalent of `install/common.sh`. Dot-sourced by every other script in this list. |
+| `windows/tools.ps1` | The [tool picker](../SELECTION.md) and its registry — same ids, categories and keys as the WSL side, mapped to scoop packages. Runs before anything is installed. |
 | `windows/packages.ps1` | Installs [scoop](https://scoop.sh) itself if missing, adds the `extras`/`versions` buckets, then installs the CLI stack. |
 | `windows/profile.ps1` | Writes a managed block into the pwsh `$PROFILE` (idempotent — re-running replaces only the block between `# >>> dotfiles managed block` markers, your own additions above/below are untouched): prompt, PSReadLine predictions, PSFzf bindings, modern-CLI aliases, [git aliases](../CHEATSHEET.md#git), and the fastfetch greeting. Also junctions `config\fastfetch` into `~\.config\fastfetch`. |
 | `windows/terminal.ps1` | Adds all four `themes/*/windows-terminal.json` color schemes to Windows Terminal's `settings.json` and applies the selected one **to the PowerShell profile entry only**. |

@@ -1,4 +1,4 @@
-// fastfetch — shell greeting, printed on every new interactive shell.
+// Rocker Labs Dotfiles — fastfetch greeting, printed on every new shell.
 // Symlinked to ~/.config/fastfetch/ by install/link.sh.
 //
 // Keep this fast: it runs on every new tab. No `command` modules (each one

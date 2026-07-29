@@ -89,14 +89,28 @@ install_uv() {
 }
 
 install_lang_toolchains() {
-  log_step "Phase 8: Language toolchains (rustup / fnm+pnpm / uv)"
-  install_rustup
-  if install_fnm; then
-    install_pnpm
-  else
-    log_warn "Skipping pnpm (Node.js setup did not complete)."
+  if ! any_tool_selected rustup fnm pnpm uv; then
+    log_info "Phase 8: no language toolchains selected, skipping."
+    return 0
   fi
-  install_uv
+  log_step "Phase 8: Language toolchains (rustup / fnm+pnpm / uv)"
+
+  tool_selected rustup && install_rustup
+
+  if tool_selected fnm; then
+    if install_fnm; then
+      tool_selected pnpm && install_pnpm
+    else
+      log_warn "Skipping pnpm (Node.js setup did not complete)."
+    fi
+  elif tool_selected pnpm; then
+    # pnpm is a standalone binary, so it works without fnm — it just uses
+    # whatever node happens to be on PATH.
+    install_pnpm
+  fi
+
+  tool_selected uv && install_uv
+  return 0
 }
 
 if [ "${1:-}" = "--run" ]; then
