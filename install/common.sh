@@ -114,7 +114,14 @@ install_release_bin() {
       curl -fsSL -o "$tmp/$name" "$url" || { rm -rf "$tmp"; log_warn "Download failed for $name"; return 1; }
       ;;
   esac
-  bin="$(find "$tmp" -type f \( -name "$name" -o -name "$name-*" \) | head -1)"
+  # Release tarballs frequently ship a shell-completion file named after the
+  # binary (fastfetch's does: usr/share/bash-completion/completions/fastfetch),
+  # and find's traversal order is not guaranteed — so prefer an executable
+  # under a bin/ directory, then any executable, before falling back to
+  # whatever matches by name (raw single-file downloads arrive mode 0644).
+  bin="$(find "$tmp" -type f \( -name "$name" -o -name "$name-*" \) -path '*/bin/*' -perm -u+x 2>/dev/null | head -1)"
+  [ -n "$bin" ] || bin="$(find "$tmp" -type f \( -name "$name" -o -name "$name-*" \) -perm -u+x 2>/dev/null | head -1)"
+  [ -n "$bin" ] || bin="$(find "$tmp" -type f \( -name "$name" -o -name "$name-*" \) 2>/dev/null | head -1)"
   if [ -z "$bin" ]; then
     rm -rf "$tmp"
     log_warn "No $name binary found in release asset."
@@ -158,14 +165,14 @@ select_theme() {
   echo "2) tron"
   echo "3) cyber"
   echo "4) eva01"
-  echo "5) radley"
+  echo "5) minimal"
   read -r -p "Select [1-5] (default 1): " choice </dev/tty
   case "$choice" in
     1|"") DOT_THEME="default" ;;
     2) DOT_THEME="tron" ;;
     3) DOT_THEME="cyber" ;;
     4) DOT_THEME="eva01" ;;
-    5) DOT_THEME="radley" ;;
+    5) DOT_THEME="minimal" ;;
     *) DOT_THEME="default" ;;
   esac
 }

@@ -70,6 +70,7 @@ print_summary() {
   summary_row "yazi" yazi
   summary_row "sshs" sshs
   summary_row "lnav" lnav -V
+  summary_row "fastfetch" fastfetch --version
 
   echo "" >&2
   echo "Editor:" >&2

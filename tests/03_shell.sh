@@ -13,9 +13,33 @@ fi
 fish -lc "echo ok" >/dev/null
 zsh -lic "echo ok" >/dev/null
 
-# radleylewis-based config must load its aliases and plugin loader
+# The config/zsh modules must all be loaded: aliases (ll), the plugin
+# loader (zplugin-update) and the git module (gst + its friends).
 zsh -lic "type ll >/dev/null && type zplugin-update >/dev/null" \
-  || { echo "zsh did not load the radleylewis base config." >&2; exit 1; }
+  || { echo "zsh did not load the config/zsh modules." >&2; exit 1; }
+
+# Git aliases (config/zsh/git.zsh) — check the full set the docs promise, in
+# a single shell so the check stays fast. The list has to reach zsh as one
+# line: a newline inside the `for` word list is a parse error, and a parse
+# error would produce empty output and silently "pass".
+GIT_ALIASES="gst gss ga gaa gap grs grst gc gcm gca gcan gcf gco gcob gsw gswc gswd gb gba gbd gbD gbv gbr gbclean gd gds gdw gl glog gadog gf gpl gp gpu gpf gsta gstp gstl grb grbi grbc grba gwt"
+if ! missing="$(zsh -lic "for a in $GIT_ALIASES; do type \$a >/dev/null 2>&1 || print -r -- \$a; done")"; then
+  echo "zsh failed while checking git aliases (see the error above)." >&2
+  exit 1
+fi
+if [ -n "$missing" ]; then
+  echo "Missing git aliases (expected from config/zsh/git.zsh): $(echo "$missing" | tr '\n' ' ')" >&2
+  exit 1
+fi
+
+# The aliases must complete like the git subcommand they wrap: compdef has
+# to exist (compinit ran in core.zsh) and each alias must be registered
+# against the _git completion function.
+uncompleted="$(zsh -lic 'for a in gst gc gco gcob gsw gswc gb gbD; do [[ ${_comps[$a]} == _git ]] || print -r -- $a; done')"
+if [ -n "$uncompleted" ]; then
+  echo "Git aliases without completion: $(echo "$uncompleted" | tr '\n' ' ')" >&2
+  exit 1
+fi
 
 # Plugins (syntax highlighting, autosuggestions, etc.) must be present
 plugdir="${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins"

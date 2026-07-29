@@ -26,8 +26,8 @@ $RepoUrl = 'https://github.com/Robertcl795/dotfiles.git'
 # already exist in that scope from a prior run, PowerShell throws
 # "attribute cannot be added because variable ... would no longer be
 # valid" when re-attaching a ValidateSet attribute to them.
-if ($Theme -and $Theme -notin @('tron', 'cyber', 'eva01', 'radley')) {
-    Write-Host "[ERROR] -Theme must be one of: tron, cyber, eva01, radley" -ForegroundColor Red
+if ($Theme -and $Theme -notin @('tron', 'cyber', 'eva01', 'minimal')) {
+    Write-Host "[ERROR] -Theme must be one of: tron, cyber, eva01, minimal" -ForegroundColor Red
     exit 1
 }
 if ($EnableK8s -and $EnableK8s -notin @('0', '1')) {

@@ -68,12 +68,12 @@ function Select-Theme {
     Write-Host '1) tron'
     Write-Host '2) cyber'
     Write-Host '3) eva01'
-    Write-Host '4) radley'
+    Write-Host '4) minimal'
     $choice = Read-Host 'Select [1-4] (default 2)'
     $env:DOT_THEME = switch ($choice) {
         '1' { 'tron' }
         '3' { 'eva01' }
-        '4' { 'radley' }
+        '4' { 'minimal' }
         default { 'cyber' }
     }
 }

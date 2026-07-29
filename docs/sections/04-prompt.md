@@ -9,21 +9,27 @@ timestamped backup of anything already there.
 
 ## Themes
 
-`DOT_THEME` picks one of four, all under [`themes/`](../../themes):
+`DOT_THEME` picks one of five. Previews, palettes and Nerd Font
+requirements: **[THEMES.md](../THEMES.md)**.
 
-| Theme | Accent | File |
-| --- | --- | --- |
-| `tron` | cyan | `themes/tron/starship.toml` |
-| `cyber` (default) | green | `themes/cyber/starship.toml` |
-| `eva01` | purple | `themes/eva01/starship.toml` |
-| `radley` | blue/purple, Nerd Font icons | `themes/radley/starship.toml` |
+| Theme | Accent | File | Nerd Font |
+| --- | --- | --- | --- |
+| `default` | green, two-line box | `config/starship/starship.toml` | yes |
+| `tron` | electric cyan | `themes/tron/starship.toml` | no |
+| `cyber` | terminal green | `themes/cyber/starship.toml` | no |
+| `eva01` | violet | `themes/eva01/starship.toml` | no |
+| `minimal` | blue/purple, single line | `themes/minimal/starship.toml` | yes |
 
-Falls back to `cyber` with a warning if `DOT_THEME` doesn't match a
-`themes/*` directory.
+`default` is the interactive default on the WSL path; the native-Windows
+path defaults to `cyber` (it's the only one of the two with a matching
+terminal colour scheme). Falls back to the default config with a warning if
+`DOT_THEME` doesn't match a `themes/*` directory.
 
 Switch themes any time without re-running the whole bootstrap:
 
 ```bash
+make theme THEME=tron
+# same thing:
 DOT_THEME=tron bash install/prompt/starship.sh --run
 ```
 

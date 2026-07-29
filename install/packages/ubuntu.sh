@@ -89,6 +89,12 @@ install_cli_extras_ubuntu() {
   install_release_bin yazi "https://github.com/sxyazi/yazi/releases/latest/download/yazi-${rust_arch}-unknown-linux-gnu.zip"
   install_release_bin sshs "https://github.com/quantumsheep/sshs/releases/latest/download/sshs-linux-${arch}"
 
+  # fastfetch entered the Ubuntu archive in 24.10; older releases (and the
+  # LTS) need the upstream build.
+  if ! ensure_cmd fastfetch && ! sudo apt-get install -y fastfetch 2>/dev/null; then
+    install_release_bin fastfetch "https://github.com/fastfetch-cli/fastfetch/releases/latest/download/fastfetch-linux-${arch}.tar.gz"
+  fi
+
   if ! ensure_cmd duf; then
     local duf_ver="${DOT_DUF_VERSION:-0.8.1}"
     install_release_bin duf "https://github.com/muesli/duf/releases/download/v${duf_ver}/duf_${duf_ver}_linux_${arch}.tar.gz"

@@ -1,6 +1,5 @@
-# Vendored from https://github.com/radleylewis/zsh (.zshrc)
-# Adapted for Robertcl795/dotfiles: lf/NVM removed (yazi + fnm are used
-# instead), tools guarded so a partial install never breaks the shell.
+# History, shell options, completion and system fzf bindings.
+# Every tool is guarded, so a partial install never breaks shell startup.
 
 # =========================================================
 # History

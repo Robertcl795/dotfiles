@@ -5,13 +5,17 @@ Scripts: [`install/packages/ubuntu.sh`](../../install/packages/ubuntu.sh),
 
 Installs the base toolchain and modern CLI stack: `git curl wget unzip
 ca-certificates ripgrep fd bat eza fzf zoxide neovim starship tldr fish zsh`
-plus `lazygit glow duf lazydocker yazi sshs lnav just zellij`.
+plus `lazygit glow duf lazydocker yazi sshs lnav just zellij fastfetch`.
+
+Full matrix of what each tool replaces and how to reach it:
+[TOOLS.md](../TOOLS.md).
 
 ## Ubuntu
 
 - Uses `apt-get`. Ubuntu's archive lags upstream, so several tools
-  (`lazygit`, `glow`, `lazydocker`, `zellij`, `yazi`, `sshs`, and `duf` if
-  apt doesn't have it) are installed straight from GitHub release binaries
+  (`lazygit`, `glow`, `lazydocker`, `zellij`, `yazi`, `sshs`, `fastfetch`
+  before 24.10, and `duf` if apt doesn't have it) are installed straight
+  from GitHub release binaries
   into `~/.local/bin` instead — see `install_release_bin` in
   [`install/common.sh`](../../install/common.sh). Override pinned versions
   with `DOT_LAZYGIT_VERSION`, `DOT_GLOW_VERSION`, `DOT_LAZYDOCKER_VERSION`,
@@ -33,7 +37,8 @@ plus `lazygit glow duf lazydocker yazi sshs lnav just zellij`.
 
 - Uses `pacman`, with almost everything available directly from the
   official repos (including `tldr`, `zellij`, `lazygit`, `glow`,
-  `lazydocker`, `yazi`, `lnav`, `just` — no release-binary fallback needed).
+  `lazydocker`, `yazi`, `lnav`, `just`, `fastfetch` — no release-binary
+  fallback needed).
 - `sshs` isn't in the official repos: tries AUR via `yay` (bootstrapped
   from the `yay-bin` PKGBUILD if missing) first, then `cargo install sshs`,
   then a GitHub release binary.

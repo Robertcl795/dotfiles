@@ -23,7 +23,7 @@ install_packages_arch() {
     base-devel git curl wget unzip ca-certificates \
     ripgrep fd bat eza fzf zoxide neovim starship \
     tldr fish zsh \
-    lazygit glow duf lazydocker yazi lnav just zellij
+    lazygit glow duf lazydocker yazi lnav just zellij fastfetch
 
   install_sshs_arch
 

@@ -1,5 +1,4 @@
-# Vendored from https://github.com/radleylewis/zsh (plugins.zsh)
-# Adapted for Robertcl795/dotfiles: plugins live under XDG_DATA_HOME so the
+# Minimal plugin loader: clones into XDG_DATA_HOME on first use so the
 # repo checkout (symlinked into ~/.config) never gets polluted with clones.
 
 # =========================================================

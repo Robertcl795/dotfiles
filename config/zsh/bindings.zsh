@@ -1,4 +1,5 @@
-# Vendored from https://github.com/radleylewis/zsh (bindings.zsh)
+# Keybindings. zsh-vi-mode resets bindings on init, so custom ones are
+# registered from its post-init hook (see below).
 
 # =========================================================
 # Keybindings

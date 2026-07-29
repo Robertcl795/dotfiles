@@ -26,8 +26,8 @@ install_zsh() {
     esac
   fi
 
-  # Pre-clone plugins used by the radleylewis-based config so the first
-  # shell launch is instant and works offline.
+  # Pre-clone the plugins config/zsh/plugins.zsh loads, so the first shell
+  # launch is instant and works offline.
   local plugin_dir="${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins"
   mkdir -p "$plugin_dir"
   local repo name
